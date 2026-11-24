@@ -1,0 +1,1641 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-display: 'Fredoka', ui-rounded, 'SF Pro Rounded', system-ui, sans-serif;
+    --font-body: 'Nunito', ui-rounded, 'SF Pro Rounded', system-ui, sans-serif;
+  }
+
+  html,
+  body,
+  #root {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    font-family: var(--font-body);
+    background-color: #FFFDF7;
+    color: #1E1B2E;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+/* Soft Warm Cream (#FFFDF7) canvas with subtle 15% opacity #4efcfb & #fee330 tablecloth polka-dot pattern */
+.kitchen-tablecloth-bg {
+  background-color: #FFFDF7;
+  background-image:
+    radial-gradient(circle at 20px 20px, rgba(78, 252, 251, 0.15) 4.5px, transparent 5px),
+    radial-gradient(circle at 48px 48px, rgba(254, 227, 48, 0.15) 4.5px, transparent 5px),
+    repeating-linear-gradient(
+      0deg,
+      rgba(254, 227, 48, 0.05) 0px,
+      rgba(254, 227, 48, 0.05) 28px,
+      transparent 28px,
+      transparent 56px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(78, 252, 251, 0.05) 0px,
+      rgba(78, 252, 251, 0.05) 28px,
+      transparent 28px,
+      transparent 56px
+    );
+  background-size: 56px 56px, 56px 56px, 56px 56px, 56px 56px;
+}
+
+/* Crisp Pure White (#ffffff) panel surface for right food shelf so SVG illustrations pop */
+.wooden-pantry-bg {
+  background-color: #ffffff;
+}
+
+/* Outlined cartoon title shadow for kid-friendly readability */
+.title-cartoon-outline {
+  text-shadow:
+    0 2px 0 #FFFFFF,
+    2px 0 0 #FFFFFF,
+    -2px 0 0 #FFFFFF,
+    0 -2px 0 #FFFFFF,
+    0 4px 0 rgba(30, 27, 46, 0.22);
+}
+
+/* Brand Morado Eléctrico (#8137ea) title with crisp #1E1B2E cartoon outline & 3D drop shadow */
+.title-nutriplato-brand {
+  color: #8137ea;
+  paint-order: stroke fill;
+  -webkit-text-stroke: 4px #1E1B2E;
+  text-shadow: 0 4px 0 #1E1B2E;
+}
+
+.title-label-stroke {
+  paint-order: stroke fill;
+  -webkit-text-stroke: 3.5px #FFFFFF;
+  text-shadow: 0 3px 0 rgba(30, 27, 46, 0.28);
+}
+
+.title-label-stroke-dark {
+  paint-order: stroke fill;
+  -webkit-text-stroke: 3.5px #1E1B2E;
+  text-shadow: 0 3px 0 #1E1B2E;
+}
+
+/* Crisp high-DPI raster rendering with smooth bicubic/Lanczos resampling */
+.crisp-raster-art {
+  image-rendering: auto;
+  backface-visibility: hidden;
+}
+
+/* Skip painting & idle animation work for off-screen conveyor tray items */
+.tray-item-virtual {
+  content-visibility: auto;
+  contain-intrinsic-size: 260px 260px;
+}
+
+.semaforo-tray-item-virtual {
+  content-visibility: auto;
+  contain-intrinsic-size: 164px 164px;
+}
+
+/* Prevent redundant mouseover/mouseout churn on decorative SVG children inside controls */
+button svg,
+.food-option svg,
+.flashcard-alimento svg {
+  pointer-events: none;
+}
+
+/* Dynamically promoted GPU layer strictly while an interaction is active */
+.gpu-active-layer {
+  will-change: transform;
+}
+
+/* Idle breathing & gentle float for food stickers (pure GPU translate3d) */
+@keyframes food-idle {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(0, -4px, 0) scale(1.02) rotate(1deg);
+  }
+}
+
+/* Gelatinous bounce when food lands on the plate */
+@keyframes food-drop-bounce {
+  0% {
+    transform: translate3d(0, -32px, 0) scale(0.4, 1.45);
+    opacity: 0.4;
+  }
+  38% {
+    transform: translate3d(0, 5px, 0) scale(1.22, 0.78);
+    opacity: 1;
+  }
+  62% {
+    transform: translate3d(0, -6px, 0) scale(0.92, 1.1);
+  }
+  82% {
+    transform: translate3d(0, 1px, 0) scale(1.05, 0.96);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) scale(1, 1);
+  }
+}
+
+/* Water fill rising animation inside Hydration Glass */
+@keyframes water-fill-rise {
+  0% {
+    transform: translate3d(0, 65%, 0);
+    opacity: 0.5;
+  }
+  65% {
+    transform: translate3d(0, -4%, 0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+  }
+}
+
+@keyframes water-wave-bob {
+  0%, 100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(-6px, -2px, 0);
+  }
+}
+
+@keyframes bubble-float {
+  0% {
+    transform: translate3d(0, 8px, 0) scale(0.6);
+    opacity: 0;
+  }
+  35% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate3d(0, -22px, 0) scale(1.1);
+    opacity: 0;
+  }
+}
+
+/* Playful shake when distractor or wrong sector is attempted */
+@keyframes plate-wiggle {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+  20% { transform: translate3d(-8px, 0, 0) rotate(-2deg); }
+  40% { transform: translate3d(8px, 0, 0) rotate(2deg); }
+  60% { transform: translate3d(-5px, 0, 0) rotate(-1deg); }
+  80% { transform: translate3d(5px, 0, 0) rotate(1deg); }
+}
+
+/* Starburst particles around dropped food */
+@keyframes star-burst {
+  0% {
+    transform: translate3d(0, 0, 0) scale(0.3) rotate(0deg);
+    opacity: 1;
+  }
+  65% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(var(--tx, 0px), var(--ty, -42px), 0) scale(1.25) rotate(160deg);
+    opacity: 0;
+  }
+}
+
+/* Chef Puppy animations */
+@keyframes puppy-breathe {
+  0%, 100% { transform: translate3d(0, 0, 0) scaleY(1); }
+  50% { transform: translate3d(0, -3px, 0) scaleY(1.018); }
+}
+
+@keyframes puppy-blink {
+  0%, 92%, 100% { transform: scaleY(1); }
+  96% { transform: scaleY(0.1); }
+}
+
+@keyframes puppy-ear-left {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(-6deg); }
+}
+
+@keyframes puppy-ear-right {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(6deg); }
+}
+
+@keyframes puppy-celebrate {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg) scale(1); }
+  25% { transform: translate3d(0, -8px, 0) rotate(-3deg) scale(1.03); }
+  75% { transform: translate3d(0, -6px, 0) rotate(3deg) scale(1.03); }
+}
+
+/* Confetti animation (GPU translate3d, clean finite burst) */
+@keyframes confetti-fall {
+  0% {
+    transform: translate3d(0, -10vh, 0) rotate(0deg);
+    opacity: 1;
+  }
+  85% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate3d(0, 108vh, 0) rotate(540deg);
+    opacity: 0;
+  }
+}
+
+/* Contenedor interno exclusivo para la animación 3D automática e infinita de alimentos (60 FPS GPU) */
+.alimento-3d-wrapper,
+.alimento-animacion-3d {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transform-origin: center center;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  will-change: transform;
+  animation-name: flotarInclinacion3D !important;
+  animation-duration: 4.5s !important;
+  animation-timing-function: ease-in-out !important;
+  animation-iteration-count: infinite !important;
+  animation-play-state: running;
+}
+
+/* Al agarrar o arrastrar el alimento, pausamos la animación para precisión total */
+.alimento-3d-wrapper:active,
+.alimento-3d-wrapper.arrastrando,
+.alimento-animacion-3d:active,
+.alimento-animacion-3d.arrastrando,
+.food-option:active .alimento-3d-wrapper,
+.food-option.arrastrando .alimento-3d-wrapper,
+.food-option:active .alimento-animacion-3d,
+.food-option.arrastrando .alimento-animacion-3d,
+.flashcard-alimento:active .alimento-3d-wrapper,
+.flashcard-alimento:active .alimento-animacion-3d,
+.plated-food-active .alimento-3d-wrapper,
+.plated-food-active .alimento-animacion-3d {
+  animation-play-state: paused !important;
+}
+
+@keyframes flotarInclinacion3D {
+  0%, 100% {
+    transform: perspective(650px) translate3d(0px, 0px, 0px) rotateX(0.01deg) rotateY(0.01deg) rotateZ(0.01deg);
+  }
+  25% {
+    transform: perspective(650px) translate3d(0px, -9px, 16px) rotateX(9deg) rotateY(-12deg) rotateZ(-2.2deg);
+  }
+  50% {
+    transform: perspective(650px) translate3d(0px, -4px, 8px) rotateX(-7deg) rotateY(11deg) rotateZ(1.8deg);
+  }
+  75% {
+    transform: perspective(650px) translate3d(0px, -10px, 18px) rotateX(8deg) rotateY(9deg) rotateZ(-1.2deg);
+  }
+}
+
+/* Desfase automático si hay varios alimentos juntos para que no se muevan sincronizados */
+.alimento-3d-wrapper:nth-child(2n),
+.alimento-animacion-3d:nth-child(2n) { animation-delay: -1.2s; }
+.alimento-3d-wrapper:nth-child(3n),
+.alimento-animacion-3d:nth-child(3n) { animation-delay: -2.7s; }
+.alimento-3d-wrapper:nth-child(4n),
+.alimento-animacion-3d:nth-child(4n) { animation-delay: -3.5s; }
+
+.animate-food-idle {
+  animation-name: flotarInclinacion3D !important;
+  animation-duration: 4.5s !important;
+  animation-timing-function: ease-in-out !important;
+  animation-iteration-count: infinite !important;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.food-sticker-btn {
+  transition: transform 150ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.food-sticker-btn:active .food-art-wrap {
+  transform: translate3d(0, 2px, 0) scale(0.96);
+}
+
+.food-art-wrap {
+  transition: transform 150ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Dragging elevation & slight tilt (pure GPU transform, zero dynamic filter repaint) */
+.food-dragging {
+  transform: translate3d(0, -10px, 0) scale(1.16) rotate(-5deg);
+  z-index: 20;
+}
+
+@keyframes placed-badge-pop {
+  0% {
+    transform: scale(0) rotate(-20deg);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.28) rotate(6deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+.animate-placed-badge-pop {
+  animation: placed-badge-pop 420ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animate-drop-bounce {
+  animation: food-drop-bounce 540ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animate-water-rise {
+  animation: water-fill-rise 680ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animate-water-wave {
+  animation: water-wave-bob 2.6s ease-in-out infinite;
+}
+
+.animate-bubble-float {
+  animation: bubble-float 2.2s ease-in infinite;
+}
+
+.animate-plate-wiggle {
+  animation: plate-wiggle 420ms ease-in-out;
+}
+
+.animate-star-burst {
+  animation: star-burst 700ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-puppy-breathe {
+  animation: puppy-breathe 3s ease-in-out infinite;
+}
+
+.animate-puppy-celebrate {
+  animation: puppy-celebrate 750ms ease-in-out infinite;
+}
+
+.animate-puppy-blink {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: puppy-blink 4.2s ease-in-out infinite;
+}
+
+.animate-puppy-ear-left {
+  transform-box: fill-box;
+  transform-origin: top right;
+  animation: puppy-ear-left 2.6s ease-in-out infinite;
+}
+
+.animate-puppy-ear-right {
+  transform-box: fill-box;
+  transform-origin: top left;
+  animation: puppy-ear-right 2.6s ease-in-out infinite 0.2s;
+}
+
+.animate-confetti {
+  animation: confetti-fall linear forwards;
+}
+
+/* Custom slim cheerful scrollbar & instant per-frame scrolling for 60 FPS conveyor auto-scroll */
+.tray-vertical-carousel {
+  scroll-behavior: auto;
+}
+.tray-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(129, 55, 234, 0.45) rgba(30, 27, 46, 0.06);
+}
+.tray-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.tray-scroll::-webkit-scrollbar-track {
+  background: rgba(30, 27, 46, 0.06);
+  border-radius: 9999px;
+}
+.tray-scroll::-webkit-scrollbar-thumb {
+  background: rgba(129, 55, 234, 0.45);
+  border-radius: 9999px;
+}
+.tray-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(129, 55, 234, 0.72);
+}
+
+/* Superpower 3D Card Flip & Expand */
+.perspective-1200 {
+  perspective: 1200px;
+}
+
+@keyframes card-3d-flip-expand {
+  0% {
+    transform: rotateY(-88deg) scale(0.78);
+    opacity: 0.25;
+  }
+  55% {
+    transform: rotateY(10deg) scale(1.02);
+    opacity: 1;
+  }
+  100% {
+    transform: rotateY(0deg) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes body-zone-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.85;
+  }
+  50% {
+    transform: scale(1.16);
+    opacity: 0.35;
+  }
+}
+
+.animate-card-3d-flip {
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  animation: card-3d-flip-expand 620ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animate-body-zone-pulse {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: body-zone-pulse 1.5s ease-in-out infinite;
+}
+
+.superpower-vote-card {
+  transition: transform 150ms cubic-bezier(0.22, 1, 0.36, 1), opacity 160ms ease;
+}
+
+.superpower-vote-card:hover {
+  transform: translate3d(0, -8px, 0) scale(1.025);
+}
+
+.superpower-vote-card:active {
+  transform: translate3d(0, -2px, 0) scale(0.985);
+}
+
+.superpower-floating-block {
+  transition: transform 160ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.superpower-floating-block:hover,
+.superpower-floating-block:active,
+.superpower-floating-block:focus-within {
+  transform: translate3d(0, -4px, 0);
+}
+
+.superpower-floating-icon {
+  filter: drop-shadow(0 8px 10px rgba(30, 27, 46, 0.16));
+}
+
+@keyframes detail-stage-enter {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+.animate-detail-stage-enter {
+  animation: detail-stage-enter 260ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.floating-wash-purple {
+  background: radial-gradient(circle at 22% 18%, rgba(129, 55, 234, 0.11), rgba(255, 253, 247, 0.7) 75%);
+}
+
+.floating-wash-green {
+  background: radial-gradient(circle at 22% 18%, rgba(93, 209, 24, 0.14), rgba(255, 253, 247, 0.7) 75%);
+}
+
+.floating-wash-yellow {
+  background: radial-gradient(circle at 22% 18%, rgba(254, 227, 48, 0.22), rgba(255, 253, 247, 0.72) 75%);
+}
+
+@keyframes progress-shimmer {
+  0% {
+    transform: translate3d(-60%, 0, 0);
+  }
+  100% {
+    transform: translate3d(320%, 0, 0);
+  }
+}
+
+@keyframes progress-shimmer-vertical {
+  0% {
+    transform: translate3d(0, 120%, 0);
+  }
+  100% {
+    transform: translate3d(0, -280%, 0);
+  }
+}
+
+@keyframes bulb-bob-glow {
+  0%, 100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -4px, 0);
+  }
+}
+
+@keyframes bulb-aura-pulse {
+  0%, 100% {
+    transform: scale(0.94);
+    opacity: 0.72;
+  }
+  50% {
+    transform: scale(1.14);
+    opacity: 1;
+  }
+}
+
+@keyframes bulb-ray-twinkle {
+  0%, 100% {
+    transform: scale(0.88);
+    opacity: 0.55;
+  }
+  50% {
+    transform: scale(1.14);
+    opacity: 1;
+  }
+}
+
+@keyframes modal-pop-in {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 20px, 0) scale(0.86);
+  }
+  65% {
+    opacity: 1;
+    transform: translate3d(0, -3px, 0) scale(1.025);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes trophy-celebrate {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+  }
+  25% {
+    transform: scale(1.16) rotate(-8deg);
+  }
+  50% {
+    transform: scale(1.1) rotate(8deg);
+  }
+  75% {
+    transform: scale(1.14) rotate(-4deg);
+  }
+}
+
+@keyframes guide-fade-slide {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 6px, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.animate-progress-shimmer {
+  animation: progress-shimmer 2.1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.animate-progress-shimmer-vertical {
+  animation: progress-shimmer-vertical 2.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.animate-bulb-bob {
+  animation: bulb-bob-glow 2.2s ease-in-out infinite;
+}
+
+.animate-bulb-aura {
+  animation: bulb-aura-pulse 1.9s ease-in-out infinite;
+}
+
+.animate-bulb-rays {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: bulb-ray-twinkle 1.5s ease-in-out infinite;
+}
+
+.animate-modal-pop {
+  animation: modal-pop-in 260ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animate-trophy-celebrate {
+  animation: trophy-celebrate 700ms cubic-bezier(0.22, 1, 0.36, 1) 2;
+}
+
+.animate-guide-fade-slide {
+  animation: guide-fade-slide 200ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes cards-slide-in-right {
+  0% {
+    opacity: 0;
+    transform: translate3d(38px, 0, 0) scale(0.97);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes cards-slide-in-left {
+  0% {
+    opacity: 0;
+    transform: translate3d(-38px, 0, 0) scale(0.97);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+.animate-cards-slide-right {
+  animation: cards-slide-in-right 240ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animate-cards-slide-left {
+  animation: cards-slide-in-left 240ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.plated-food-elastic {
+  transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.plated-food-size-elastic {
+  transition:
+    width 150ms cubic-bezier(0.22, 1, 0.36, 1),
+    height 150ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Cartas del Superpoder — Flashcard Enmarcada */
+.flashcard-alimento {
+  background-color: var(--color-alimento);
+  border: 3.5px solid #1E1B2E;
+  border-radius: 24px;
+  padding: 14px 14px 18px 14px;
+  box-shadow: 0 8px 0 #1E1B2E;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: transform 150ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.flashcard-alimento:hover {
+  transform: translate3d(0, -6px, 0) scale(1.03);
+}
+
+.flashcard-alimento:active {
+  transform: translate3d(0, -1px, 0) scale(0.99);
+}
+
+.flashcard-imagen-contenedor {
+  background: transparent;
+  width: 100%;
+  flex: 1 1 0%;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  padding: 12px;
+  min-height: 0;
+}
+
+.flashcard-nombre {
+  margin-top: 10px;
+  font-family: var(--font-display);
+  font-size: 1.65rem;
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow:
+    0 2px 0 #1E1B2E,
+    1px 1px 0 #1E1B2E,
+    -1px -1px 0 #1E1B2E,
+    1px -1px 0 #1E1B2E,
+    -1px 1px 0 #1E1B2E;
+  text-align: center;
+  line-height: 1.15;
+}
+
+@keyframes detail-card-3d-enter {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0) scale(0.97);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes aaa-card-tap-bounce {
+  0% {
+    transform: scale(1);
+  }
+  30% {
+    transform: scale(0.95, 1.04) translate3d(0, 3px, 0);
+  }
+  65% {
+    transform: scale(1.03, 0.98) translate3d(0, -5px, 0);
+  }
+  100% {
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+}
+
+@keyframes aaa-sparkle-twinkle {
+  0%, 100% {
+    transform: scale(0.85) rotate(0deg);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.22) rotate(18deg);
+    opacity: 1;
+  }
+}
+
+.animate-detail-card-3d {
+  opacity: 0;
+  animation: detail-card-3d-enter 320ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animate-aaa-card-tap {
+  animation: aaa-card-tap-bounce 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.animate-aaa-sparkle {
+  animation: aaa-sparkle-twinkle 2.4s ease-in-out infinite;
+}
+
+/* Cartas del Superpoder — Vista Desplegable de Detalle */
+.vista-detalle-alimento {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: calc(100vh - 90px);
+  padding: 16px 24px;
+  overflow-y: auto;
+}
+
+.detalle-columna-alimento {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 18px;
+}
+
+.detalle-columna-alimento svg,
+.detalle-columna-alimento img,
+.detalle-columna-alimento canvas {
+  width: 280px;
+  height: 280px;
+  filter: drop-shadow(0 12px 10px rgba(30, 27, 46, 0.26));
+}
+
+.detalle-tarjetas-horizontales {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  width: 100%;
+}
+
+/* Clean Stable Info Card Container (Zero Erratic Tilt) */
+.aaa-card-3d-scene {
+  position: relative;
+}
+
+.aaa-food-3d-scene {
+  position: relative;
+}
+
+.aaa-food-3d-target {
+  cursor: pointer;
+}
+
+.tarjeta-info-amplia {
+  position: relative;
+  border: 4px solid #1E1B2E;
+  border-bottom-width: 11px;
+  border-radius: 32px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transform: translate3d(0, 0, 0);
+  transition: transform 160ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+.tarjeta-info-amplia:hover {
+  transform: translate3d(0, -4px, 0);
+}
+
+.tarjeta-info-amplia.aaa-card-superpower {
+  background: linear-gradient(155deg, #ffffff 0%, #faf3ff 56%, #efe0ff 100%);
+  box-shadow:
+    0 12px 0 rgba(30, 27, 46, 0.22),
+    0 20px 30px rgba(129, 55, 234, 0.24),
+    inset 0 -5px 0 rgba(168, 85, 247, 0.24),
+    inset 0 3px 0 rgba(255, 255, 255, 0.95);
+}
+
+.tarjeta-info-amplia.aaa-card-hometip {
+  background: linear-gradient(155deg, #ffffff 0%, #f5ffe9 56%, #e3fbca 100%);
+  box-shadow:
+    0 12px 0 rgba(30, 27, 46, 0.22),
+    0 20px 30px rgba(61, 168, 12, 0.24),
+    inset 0 -5px 0 rgba(93, 209, 24, 0.28),
+    inset 0 3px 0 rgba(255, 255, 255, 0.95);
+}
+
+.aaa-card-halftone-purple {
+  background-image: radial-gradient(rgba(129, 55, 234, 0.14) 2px, transparent 2.5px);
+  background-size: 14px 14px;
+}
+
+.aaa-card-halftone-green {
+  background-image: radial-gradient(rgba(53, 150, 7, 0.15) 2px, transparent 2.5px);
+  background-size: 14px 14px;
+}
+
+.aaa-card-layer-badge {
+  position: relative;
+}
+
+.aaa-card-layer-content {
+  position: relative;
+}
+
+@media (min-width: 1024px) {
+  .vista-detalle-alimento {
+    display: grid;
+    grid-template-columns: minmax(360px, 43%) 1fr;
+    gap: 44px;
+    align-items: center;
+    width: 100%;
+    height: calc(100vh - 90px);
+    padding: 16px 48px;
+    overflow: visible;
+  }
+
+  .detalle-columna-alimento svg,
+  .detalle-columna-alimento canvas {
+    width: clamp(320px, 42vh, 420px);
+    height: clamp(320px, 42vh, 420px);
+  }
+
+  .detalle-columna-alimento img {
+    width: 550px;
+    height: 500px;
+  }
+
+  .detalle-tarjetas-horizontales {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 24px;
+    width: 100%;
+    max-width: 740px;
+    margin-inline: auto;
+  }
+}
+
+@keyframes semaforo-lens-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.72;
+  }
+  50% {
+    transform: scale(1.16);
+    opacity: 1;
+  }
+}
+
+@keyframes semaforo-glow-breathe {
+  0%, 100% {
+    transform: scale(0.94);
+    opacity: 0.66;
+  }
+  50% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+}
+
+@keyframes semaforo-liquid-wave-v {
+  0% {
+    transform: translate3d(0, 0%, 0);
+  }
+  100% {
+    transform: translate3d(0, -50%, 0);
+  }
+}
+
+@keyframes semaforo-bubble-drift {
+  0% {
+    transform: translate3d(0px, 6px, 0) scale(0.55);
+    opacity: 0;
+  }
+  25% {
+    transform: translate3d(5px, -2px, 0) scale(0.95);
+    opacity: 0.88;
+  }
+  70% {
+    transform: translate3d(12px, -9px, 0) scale(1.05);
+    opacity: 0.72;
+  }
+  100% {
+    transform: translate3d(18px, -16px, 0) scale(1.12);
+    opacity: 0;
+  }
+}
+
+@keyframes semaforo-bubble-surge-h {
+  0% {
+    transform: translate3d(-6px, 6px, 0) scale(0.45);
+    opacity: 0;
+  }
+  30% {
+    transform: translate3d(4px, -3px, 0) scale(1);
+    opacity: 0.95;
+  }
+  100% {
+    transform: translate3d(20px, -16px, 0) scale(1.15);
+    opacity: 0;
+  }
+}
+
+@keyframes semaforo-shimmer-sweep {
+  0% {
+    transform: translate3d(-110%, 0, 0) skewX(-18deg);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.95;
+  }
+  100% {
+    transform: translate3d(320%, 0, 0) skewX(-18deg);
+    opacity: 0;
+  }
+}
+
+@keyframes star-goal-celebrate {
+  0% {
+    transform: scale(1) rotate(0deg);
+  }
+  25% {
+    transform: scale(1.38) rotate(-14deg);
+  }
+  55% {
+    transform: scale(1.26) rotate(14deg);
+  }
+  80% {
+    transform: scale(1.12) rotate(-5deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+.animate-semaforo-lens-pulse {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: semaforo-lens-pulse 850ms ease-in-out infinite;
+}
+
+.animate-semaforo-glow-breathe {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: semaforo-glow-breathe 2.4s ease-in-out infinite;
+}
+
+.animate-semaforo-liquid-wave-v {
+  animation: semaforo-liquid-wave-v 2.2s linear infinite;
+}
+
+.animate-semaforo-bubble-drift {
+  animation: semaforo-bubble-drift 2.6s ease-in-out infinite;
+}
+
+.animate-semaforo-bubble-surge-h {
+  animation: semaforo-bubble-surge-h 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animate-semaforo-shimmer-sweep {
+  animation: semaforo-shimmer-sweep 780ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animate-star-goal-celebrate {
+  animation: star-goal-celebrate 680ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes semaforo-warning-flash {
+  0% {
+    opacity: 0;
+  }
+  25% {
+    opacity: 0.78;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes semaforo-reset-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(-360deg);
+  }
+}
+
+.animate-semaforo-warning-flash {
+  animation: semaforo-warning-flash 620ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animate-semaforo-reset-spin {
+  animation: semaforo-reset-spin 460ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes semaforo-timer-urgent {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.07);
+  }
+}
+
+@keyframes semaforo-clock-bounce {
+  0% {
+    transform: scale(0.72) rotate(-10deg);
+  }
+  45% {
+    transform: scale(1.12) rotate(7deg);
+  }
+  72% {
+    transform: scale(0.96) rotate(-4deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+.animate-semaforo-timer-urgent {
+  animation: semaforo-timer-urgent 820ms ease-in-out infinite;
+}
+
+.animate-semaforo-clock-bounce {
+  animation: semaforo-clock-bounce 680ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes focus-food-elastic-in {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 16px, 0) scale(0.64);
+  }
+  65% {
+    opacity: 1;
+    transform: translate3d(0, -4px, 0) scale(1.06);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+/* Pure GPU scale/opacity confirmation flash (zero animated box-shadow) */
+@keyframes focus-circle-confirm-flash {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  45% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.06);
+    opacity: 1;
+  }
+}
+
+.animate-focus-food-elastic {
+  animation: focus-food-elastic-in 300ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animate-focus-circle-confirm {
+  animation: focus-circle-confirm-flash 260ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes guide-slide-in-right {
+  0% {
+    opacity: 0;
+    transform: translate3d(76px, 0, 0) scale(0.94);
+  }
+  70% {
+    opacity: 1;
+    transform: translate3d(-4px, 0, 0) scale(1.012);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes guide-slide-in-left {
+  0% {
+    opacity: 0;
+    transform: translate3d(-76px, 0, 0) scale(0.94);
+  }
+  70% {
+    opacity: 1;
+    transform: translate3d(4px, 0, 0) scale(1.012);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes guide-slide-out-left {
+  0% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(-72px, 0, 0) scale(0.92);
+  }
+}
+
+@keyframes guide-slide-out-right {
+  0% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(72px, 0, 0) scale(0.92);
+  }
+}
+
+@keyframes guide-food-stagger-in {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0) scale(0.84);
+  }
+  75% {
+    opacity: 1;
+    transform: translate3d(0, -2px, 0) scale(1.04);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+.animate-guide-slide-in-right {
+  animation: guide-slide-in-right 340ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animate-guide-slide-in-left {
+  animation: guide-slide-in-left 340ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animate-guide-slide-out-left {
+  animation: guide-slide-out-left 260ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animate-guide-slide-out-right {
+  animation: guide-slide-out-right 260ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animate-guide-food-stagger {
+  opacity: 0;
+  animation: guide-food-stagger-in 320ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes meter-wave-flow {
+  0% {
+    transform: translate3d(0%, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes meter-wave-flow-reverse {
+  0% {
+    transform: translate3d(-50%, 0, 0);
+  }
+  100% {
+    transform: translate3d(0%, 0, 0);
+  }
+}
+
+@keyframes meter-bubble-rise {
+  0% {
+    transform: translate3d(0px, 8px, 0) scale(0.55);
+    opacity: 0;
+  }
+  15% {
+    transform: translate3d(-3px, -45px, 0) scale(0.85);
+    opacity: 0.92;
+  }
+  45% {
+    transform: translate3d(4px, -180px, 0) scale(1);
+    opacity: 0.85;
+  }
+  75% {
+    transform: translate3d(-3px, -315px, 0) scale(1.08);
+    opacity: 0.65;
+  }
+  100% {
+    transform: translate3d(2px, -445px, 0) scale(1.16);
+    opacity: 0;
+  }
+}
+
+@keyframes meter-bubble-surge {
+  0% {
+    transform: translate3d(0px, 6px, 0) scale(0.45);
+    opacity: 0;
+  }
+  18% {
+    transform: translate3d(4px, -65px, 0) scale(0.95);
+    opacity: 0.96;
+  }
+  65% {
+    transform: translate3d(-4px, -255px, 0) scale(1.08);
+    opacity: 0.82;
+  }
+  100% {
+    transform: translate3d(3px, -430px, 0) scale(1.18);
+    opacity: 0;
+  }
+}
+
+@keyframes meter-delta-float {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0) scale(0.7);
+  }
+  24% {
+    opacity: 1;
+    transform: translate3d(0, -4px, 0) scale(1.12);
+  }
+  75% {
+    opacity: 1;
+    transform: translate3d(0, -22px, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(0, -34px, 0) scale(0.92);
+  }
+}
+
+/* Pure GPU rainbow flow via translate3d on oversized gradient inner strips */
+@keyframes meter-rainbow-gpu-v {
+  0%, 100% {
+    transform: translate3d(0, 0%, 0);
+  }
+  50% {
+    transform: translate3d(0, -45%, 0);
+  }
+}
+
+@keyframes meter-rainbow-gpu-h {
+  0%, 100% {
+    transform: translate3d(0%, 0, 0);
+  }
+  50% {
+    transform: translate3d(-45%, 0, 0);
+  }
+}
+
+@keyframes meter-milestone-pop {
+  0% {
+    transform: scale(0.6);
+  }
+  55% {
+    transform: scale(1.45);
+  }
+  100% {
+    transform: scale(1.15);
+  }
+}
+
+@keyframes meter-badge-pop {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.22);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes meter-goal-pulse {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+  }
+  50% {
+    transform: scale(1.09) rotate(-4deg);
+  }
+}
+
+.animate-meter-wave {
+  animation: meter-wave-flow 2.3s linear infinite;
+}
+
+.animate-meter-wave-slow {
+  animation: meter-wave-flow-reverse 3.4s linear infinite;
+}
+
+.animate-meter-bubble {
+  animation: meter-bubble-rise 2.8s ease-in-out infinite;
+}
+
+.animate-meter-bubble-surge {
+  animation: meter-bubble-surge 1.25s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animate-meter-delta {
+  animation: meter-delta-float 920ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animate-meter-rainbow {
+  animation: meter-rainbow-gpu-v 3.2s ease-in-out infinite;
+}
+
+.animate-meter-rainbow-h {
+  animation: meter-rainbow-gpu-h 3.2s ease-in-out infinite;
+}
+
+.animate-meter-milestone-pop {
+  animation: meter-milestone-pop 420ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.animate-meter-badge-pop {
+  animation: meter-badge-pop 380ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.animate-meter-goal-pulse {
+  animation: meter-goal-pulse 1.6s ease-in-out infinite;
+}
+
+/* =====================================================================
+   CUESTIONARIO RELÁMPAGO: Dynamic Red Error Shake & 3D Food Reveal Pop
+   ===================================================================== */
+@keyframes quiz-wrong-red-shake {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+    box-shadow: 0 4px 0 #1E1B2E, 0 0 0 0 rgba(254, 48, 88, 0.65);
+  }
+  16% {
+    transform: translate3d(-10px, 0, 0) rotate(-1.4deg) scale(1.015);
+    box-shadow: 0 4px 0 #b30d2f, 0 0 0 6px rgba(254, 48, 88, 0.35);
+  }
+  34% {
+    transform: translate3d(10px, 0, 0) rotate(1.4deg) scale(1.015);
+    box-shadow: 0 4px 0 #b30d2f, 0 0 0 9px rgba(254, 48, 88, 0.22);
+  }
+  52% {
+    transform: translate3d(-7px, 0, 0) rotate(-0.9deg) scale(1.008);
+    box-shadow: 0 4px 0 #b30d2f, 0 0 0 5px rgba(254, 48, 88, 0.16);
+  }
+  72% {
+    transform: translate3d(5px, 0, 0) rotate(0.6deg) scale(1);
+  }
+  88% {
+    transform: translate3d(-2px, 0, 0) rotate(0deg);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    box-shadow: 0 4px 0 #1E1B2E, 0 0 0 0 rgba(254, 48, 88, 0);
+  }
+}
+
+@keyframes quiz-reveal-backdrop-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes quiz-reveal-pop-in {
+  0% {
+    transform: perspective(900px) translate3d(0, 26px, -60px) scale(0.84) rotateX(10deg);
+    opacity: 0;
+  }
+  62% {
+    transform: perspective(900px) translate3d(0, -6px, 14px) scale(1.03) rotateX(-2deg);
+    opacity: 1;
+  }
+  100% {
+    transform: perspective(900px) translate3d(0, 0, 0) scale(1) rotateX(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes quiz-food-hero-in {
+  0% {
+    transform: translate3d(0, 34px, 0) scale(0.36) rotate(-5deg);
+    opacity: 0;
+  }
+  70% {
+    transform: translate3d(0, -10px, 0) scale(1.16) rotate(2deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(0, 0, 0) scale(1.06) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes quiz-food-hero-float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1.06);
+  }
+  50% {
+    transform: translate3d(0, -8px, 0) scale(1.11);
+  }
+}
+
+.animate-quiz-wrong-red {
+  animation: quiz-wrong-red-shake 560ms cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+.animate-quiz-reveal-backdrop {
+  animation: quiz-reveal-backdrop-in 240ms ease-out forwards;
+}
+
+.animate-quiz-reveal-pop {
+  animation: quiz-reveal-pop-in 420ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animate-quiz-food-hero {
+  will-change: transform, opacity;
+  animation:
+    quiz-food-hero-in 580ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+    quiz-food-hero-float 3s ease-in-out 580ms infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-puppy-breathe,
+  .animate-puppy-celebrate,
+  .animate-puppy-blink,
+  .animate-puppy-ear-left,
+  .animate-puppy-ear-right,
+  .animate-confetti,
+  .animate-card-3d-flip,
+  .animate-body-zone-pulse,
+  .animate-water-wave,
+  .animate-bubble-float,
+  .animate-progress-shimmer,
+  .animate-progress-shimmer-vertical,
+  .animate-bulb-bob,
+  .animate-bulb-aura,
+  .animate-bulb-rays,
+  .animate-modal-pop,
+  .animate-trophy-celebrate,
+  .animate-guide-fade-slide,
+  .animate-detail-stage-enter,
+  .animate-cards-slide-right,
+  .animate-cards-slide-left,
+  .animate-semaforo-lens-pulse,
+  .animate-semaforo-glow-breathe,
+  .animate-semaforo-liquid-wave-v,
+  .animate-semaforo-bubble-drift,
+  .animate-semaforo-bubble-surge-h,
+  .animate-semaforo-shimmer-sweep,
+  .animate-star-goal-celebrate,
+  .animate-semaforo-warning-flash,
+  .animate-semaforo-reset-spin,
+  .animate-semaforo-timer-urgent,
+  .animate-semaforo-clock-bounce,
+  .animate-focus-food-elastic,
+  .animate-focus-circle-confirm,
+  .animate-guide-slide-in-right,
+  .animate-guide-slide-in-left,
+  .animate-guide-slide-out-left,
+  .animate-guide-slide-out-right,
+  .animate-guide-food-stagger,
+  .animate-detail-card-3d,
+  .animate-aaa-card-tap,
+  .animate-aaa-sparkle,
+  .animate-meter-wave,
+  .animate-meter-wave-slow,
+  .animate-meter-bubble,
+  .animate-meter-bubble-surge,
+  .animate-meter-delta,
+  .animate-meter-rainbow,
+  .animate-meter-rainbow-h,
+  .animate-meter-milestone-pop,
+  .animate-meter-badge-pop,
+  .animate-meter-goal-pulse,
+  .animate-quiz-wrong-red,
+  .animate-quiz-reveal-backdrop,
+  .animate-quiz-reveal-pop,
+  .animate-quiz-food-hero {
+    animation: none !important;
+    opacity: 1 !important;
+  }
+
+  .superpower-floating-block,
+  .superpower-floating-icon,
+  .plated-food-elastic,
+  .plated-food-size-elastic,
+  .flashcard-alimento,
+  .tarjeta-info-amplia,
+  .aaa-food-3d-target {
+    transition: none !important;
+  }
+}
+
+/* Global App-Bar Volume Slider Thumb */
+.nutri-volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 9999px;
+  background: #fee330;
+  border: 3px solid #1E1B2E;
+  box-shadow: 0 3px 0 #1E1B2E;
+  cursor: pointer;
+  transition: transform 120ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.nutri-volume-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.12);
+}
+
+.nutri-volume-slider::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 9999px;
+  background: #fee330;
+  border: 3px solid #1E1B2E;
+  box-shadow: 0 3px 0 #1E1B2E;
+  cursor: pointer;
+  transition: transform 120ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.nutri-volume-slider::-moz-range-thumb:hover {
+  transform: scale(1.12);
+}
+
+@keyframes volume-slide-left {
+  0% {
+    opacity: 0;
+    transform: translate3d(14px, -50%, 0) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, -50%, 0) scale(1);
+  }
+}
+
+.animate-volume-slide-left {
+  animation: volume-slide-left 180ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-volume-slide-left {
+    animation: none !important;
+  }
+}
+
