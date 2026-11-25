@@ -4,8 +4,6 @@ import {
   Check,
   Gamepad2,
   Home,
-  Maximize2,
-  Minimize2,
   Play,
   RotateCcw,
   Star,
@@ -48,8 +46,6 @@ import { SemaforoModeSelector, SemaforoTimeUpModal } from './SemaforoModeSelecto
 import { SoundToggleButton } from './SoundToggleButton';
 
 interface SemaforoGameProps {
-  isFullscreen: boolean;
-  onToggleFullscreen: () => void;
   onBackToLibrary: () => void;
 }
 
@@ -648,8 +644,6 @@ const GuideFood3DShowcase: React.FC<{
 });
 
 export const SemaforoGame: React.FC<SemaforoGameProps> = ({
-  isFullscreen,
-  onToggleFullscreen,
   onBackToLibrary,
 }) => {
   const [phase, setPhase] = useState<SemaforoPhase>('guide');
@@ -1651,8 +1645,6 @@ export const SemaforoGame: React.FC<SemaforoGameProps> = ({
       <SemaforoModeSelector
         currentMode={gameMode}
         selectedMinutes={timedMinutes}
-        isFullscreen={isFullscreen}
-        onToggleFullscreen={onToggleFullscreen}
         onBackToLibrary={onBackToLibrary}
         onBackToGuide={() => setPhase('guide')}
         onSelectNormal={handleSelectNormalMode}
@@ -1864,30 +1856,6 @@ export const SemaforoGame: React.FC<SemaforoGameProps> = ({
             </button>
 
             <SoundToggleButton />
-
-            <button
-              type="button"
-              data-testid="fullscreen-btn"
-              onClick={onToggleFullscreen}
-              aria-pressed={isFullscreen}
-              aria-label={
-                isFullscreen ? 'Salir de pantalla completa' : 'Pantalla completa para TV'
-              }
-              title={
-                isFullscreen ? 'Salir de pantalla completa' : 'Pantalla Completa (TV)'
-              }
-              className={`p-2.5 rounded-2xl border-2 border-[#1E1B2E] shadow-[0_4px_0_#1E1B2E] active:translate-y-[3px] cursor-pointer shrink-0 transition-[transform,background-color] duration-150 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-                isFullscreen
-                  ? 'bg-[#fee330] hover:bg-[#f5d81d] text-[#1E1B2E]'
-                  : 'bg-[#8137ea] hover:bg-[#7028d9] text-[#ffffff]'
-              }`}
-            >
-              {isFullscreen ? (
-                <Minimize2 className="w-5 h-5" aria-hidden="true" />
-              ) : (
-                <Maximize2 className="w-5 h-5" aria-hidden="true" />
-              )}
-            </button>
           </div>
         </header>
 
@@ -2276,30 +2244,6 @@ export const SemaforoGame: React.FC<SemaforoGameProps> = ({
           </button>
 
           <SoundToggleButton />
-
-          <button
-            type="button"
-            data-testid="fullscreen-btn"
-            onClick={onToggleFullscreen}
-            aria-pressed={isFullscreen}
-            aria-label={
-              isFullscreen ? 'Salir de pantalla completa' : 'Pantalla completa para TV'
-            }
-            title={
-              isFullscreen ? 'Salir de pantalla completa' : 'Pantalla Completa (TV)'
-            }
-            className={`p-2.5 rounded-2xl border-2 border-[#1E1B2E] shadow-[0_4px_0_#1E1B2E] active:translate-y-[3px] cursor-pointer shrink-0 transition-[transform,background-color] duration-150 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-              isFullscreen
-                ? 'bg-[#fee330] hover:bg-[#f5d81d] text-[#1E1B2E]'
-                : 'bg-[#8137ea] hover:bg-[#7028d9] text-[#ffffff]'
-            }`}
-          >
-            {isFullscreen ? (
-              <Minimize2 className="w-5 h-5" aria-hidden="true" />
-            ) : (
-              <Maximize2 className="w-5 h-5" aria-hidden="true" />
-            )}
-          </button>
         </div>
       </header>
 

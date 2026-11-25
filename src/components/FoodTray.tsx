@@ -17,9 +17,11 @@ const TABS: {
   label: string;
 }[] = [
   { id: 'all', label: 'Todos' },
-  { id: 'shield', label: 'Frutas y Vegetales' },
+  { id: 'vegetables', label: 'Vegetales' },
+  { id: 'fruits', label: 'Frutas' },
+  { id: 'cereals', label: 'Cereales' },
   { id: 'protein', label: 'Proteínas' },
-  { id: 'energy', label: 'Energía' },
+  { id: 'fats', label: 'Grasas' },
   { id: 'drinks', label: 'Bebidas' },
   { id: 'processed', label: 'Procesados' },
 ];

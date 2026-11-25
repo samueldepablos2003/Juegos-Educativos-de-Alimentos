@@ -1,6 +1,5 @@
 import React, { memo, useEffect, useRef, useState } from 'react';
 import { FoodItem, PlateState, SectorId } from '../data/foods';
-import { getEnergyItems, getProteinItems, isRainbowPlate } from '../game/rules';
 import {
   BASE_PLATE_Z_INDEX,
   computeMovedSectorLocal,
@@ -185,12 +184,10 @@ const PlatedFoodItem: React.FC<PlatedFoodItemProps> = memo(
     const [isRotating, setIsRotating] = useState(false);
     const [hoverZone, setHoverZone] = useState<'center' | 'edge'>('center');
 
-    // Invalidate cached hover bounding rect whenever scale changes via wheel or auto-arrange
     useEffect(() => {
       hoverRectRef.current = null;
     }, [finalScale]);
 
-    // Clean up any pending rAF callbacks on unmount
     useEffect(() => {
       return () => {
         if (moveRafRef.current) window.cancelAnimationFrame(moveRafRef.current);
@@ -198,7 +195,6 @@ const PlatedFoodItem: React.FC<PlatedFoodItemProps> = memo(
       };
     }, []);
 
-    // Keep body cursor synced while actively dragging or rotating even if pointer leaves bounds
     useEffect(() => {
       if (!isPressed && !isRotating && !isDragging) return;
       const prevCursor = document.body.style.cursor;
@@ -208,7 +204,6 @@ const PlatedFoodItem: React.FC<PlatedFoodItemProps> = memo(
       };
     }, [isPressed, isRotating, isDragging]);
 
-    // Attach non-passive wheel listener coalesced to 1 update per rAF frame
     useEffect(() => {
       const el = itemRef.current;
       if (!el) return;
@@ -424,7 +419,6 @@ const PlatedFoodItem: React.FC<PlatedFoodItemProps> = memo(
       const wasQuickClick =
         !session.hasExceededThreshold && distMoved <= DRAG_THRESHOLD_PX;
 
-      // Commit final GPU transform coordinates to React state once on gesture end
       if (session.hasExceededThreshold) {
         if (session.mode === 'rotate') {
           onRotateFood(sector, placement.instanceId, session.latestRotation);
@@ -559,21 +553,23 @@ export const HealthyPlate: React.FC<HealthyPlateProps> = memo(({
   onMoveFood,
   onWheelResizeFood,
   onRotateFood,
-  onArrangePlate,
 }) => {
   const [dragOverSector, setDragOverSector] = useState<SectorId | null>(null);
   const bowlRef = useRef<HTMLDivElement>(null);
+  const fatsBowlRef = useRef<HTMLDivElement>(null);
   const lastFoodInteractionRef = useRef<number>(0);
-  const rainbowActive = isRainbowPlate(plate.shield);
-  const proteinItems = getProteinItems(plate);
-  const energyItems = getEnergyItems(plate);
 
   const markFoodInteractionEnded = () => {
     lastFoodInteractionRef.current = performance.now();
   };
 
-  const buildDropContext = (clientX: number, clientY: number): DropPointContext => {
-    const rect = bowlRef.current?.getBoundingClientRect();
+  const buildDropContext = (
+    clientX: number,
+    clientY: number,
+    sector: SectorId
+  ): DropPointContext => {
+    const targetRef = sector === 'fats' ? fatsBowlRef : bowlRef;
+    const rect = targetRef.current?.getBoundingClientRect();
     return {
       clientX,
       clientY,
@@ -607,7 +603,7 @@ export const HealthyPlate: React.FC<HealthyPlateProps> = memo(({
     setDragOverSector(null);
     const foodId = e.dataTransfer.getData('text/plain');
     if (foodId) {
-      onDropFood(foodId, sector, buildDropContext(e.clientX, e.clientY));
+      onDropFood(foodId, sector, buildDropContext(e.clientX, e.clientY, sector));
     }
   };
 
@@ -618,7 +614,7 @@ export const HealthyPlate: React.FC<HealthyPlateProps> = memo(({
     if (performance.now() - lastFoodInteractionRef.current < 150) {
       return;
     }
-    onSectorClick(sector, buildDropContext(e.clientX, e.clientY));
+    onSectorClick(sector, buildDropContext(e.clientX, e.clientY, sector));
   };
 
   const isTargetHighlighted = (sector: SectorId) =>
@@ -626,16 +622,19 @@ export const HealthyPlate: React.FC<HealthyPlateProps> = memo(({
     (selectedFood !== null &&
       (selectedFood.targetSector === sector || selectedFood.category === 'distractor'));
 
-  const shieldActive = isTargetHighlighted('shield');
+  const vegetablesActive = isTargetHighlighted('vegetables');
+  const fruitsActive = isTargetHighlighted('fruits');
+  const cerealsActive = isTargetHighlighted('cereals');
   const proteinActive = isTargetHighlighted('protein');
-  const energyActive = isTargetHighlighted('energy');
+  const fatsActive = isTargetHighlighted('fats');
   const hydrationActive = isTargetHighlighted('hydration');
   const isHydrated = plate.hydration !== null;
 
   const renderPlatedSectorItems = (
     sector: PlateFoodSector,
     items: FoodItem[],
-    baseFallbackPx: number
+    baseFallbackPx: number,
+    targetBowlRef: React.RefObject<HTMLDivElement | null>
   ) => {
     const sectorPlacements = placements[sector];
 
@@ -644,11 +643,11 @@ export const HealthyPlate: React.FC<HealthyPlateProps> = memo(({
         instanceId: `${sector}-${item.id}-${idx}`,
         foodId: item.id,
         sector,
-        localX: sector === 'shield' ? 52 : 48,
+        localX: 50,
         localY: 50,
         zIndex: BASE_PLATE_Z_INDEX + idx,
         rotation: ((idx % 5) - 2) * 5,
-        scale: STANDARD_FOOD_SCALE,
+        scale: sector === 'fats' ? 1.15 : STANDARD_FOOD_SCALE,
       };
       const finalScale = Math.round(placement.scale * 1000) / 1000;
       const isJustPlaced =
@@ -667,7 +666,7 @@ export const HealthyPlate: React.FC<HealthyPlateProps> = memo(({
           finalScale={finalScale}
           isJustPlaced={isJustPlaced}
           disabledInteraction={selectedFood !== null}
-          bowlRef={bowlRef}
+          bowlRef={targetBowlRef}
           onBringToFront={onBringFoodToFront}
           onMoveFood={onMoveFood}
           onWheelResizeFood={onWheelResizeFood}
@@ -680,10 +679,159 @@ export const HealthyPlate: React.FC<HealthyPlateProps> = memo(({
   };
 
   return (
-    <div className="relative flex-1 h-full min-h-0 flex items-center justify-center gap-3 sm:gap-5 xl:gap-8 px-1 sm:px-3 overflow-visible">
-      {/* CIRCULAR HEALTHY PLATE WITH THIN CERAMIC RIM, EXPANDED 50%/25%/25% BOWL & EXTERNAL CURVED LABELS */}
+    <div className="relative flex-1 self-stretch w-full h-full min-h-0 overflow-visible [container-type:size]">
+      {/* EXTRA CIRCULAR MINI-PLATE FOR HEALTHY FATS (ENLARGED & MORE UNCOVERED BEHIND UPPER-LEFT OF MAIN PLATE) */}
+      <div className="pointer-events-none absolute z-10 top-[-2cqh] left-[max(-2cqh,calc(58.5cqw_-_84cqh))] flex flex-col items-center">
+        <div
+          className={`pointer-events-none relative shrink-0 w-[min(49cqh,38cqw)] h-[min(49cqh,38cqw)] rounded-full select-none overflow-visible transition-transform duration-150 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+            fatsActive ? 'scale-105' : ''
+          } ${wiggleSector === 'fats' ? 'animate-plate-wiggle' : ''}`}
+          data-testid="fats-plate"
+        >
+          <svg
+            viewBox="-8 -8 216 216"
+            className="absolute inset-0 w-full h-full drop-shadow-[0_10px_16px_rgba(30,27,46,0.20)] pointer-events-none"
+            aria-hidden="true"
+          >
+            <defs>
+              <clipPath id="fats-inner-circle-clip">
+                <circle cx="100" cy="100" r="80" />
+              </clipPath>
+
+              <radialGradient id="fats-white-rim" cx="46%" cy="40%" r="58%">
+                <stop offset="0%" stopColor="#ffffff" />
+                <stop offset="84%" stopColor="#ffffff" />
+                <stop offset="100%" stopColor="#F3F2F7" />
+              </radialGradient>
+
+              <linearGradient id="sector-healthy-fats" x1="12%" y1="10%" x2="88%" y2="90%">
+                <stop offset="0%" stopColor={fatsActive ? '#FFF380' : '#FFE84D'} />
+                <stop offset="52%" stopColor={fatsActive ? '#FFD93B' : '#FFC812'} />
+                <stop offset="100%" stopColor={fatsActive ? '#FFB012' : '#F49D06'} />
+              </linearGradient>
+
+              <radialGradient id="fats-well-depth" cx="52%" cy="54%" r="54%">
+                <stop offset="68%" stopColor="#ffffff" stopOpacity="0.06" />
+                <stop offset="88%" stopColor="#1E1B2E" stopOpacity="0.04" />
+                <stop offset="100%" stopColor="#1E1B2E" stopOpacity="0.11" />
+              </radialGradient>
+
+              <linearGradient id="fats-specular-sheen" x1="10%" y1="10%" x2="82%" y2="85%">
+                <stop offset="0%" stopColor="#ffffff" stopOpacity="0.34" />
+                <stop offset="50%" stopColor="#ffffff" stopOpacity="0.08" />
+                <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+              </linearGradient>
+
+              <filter id="fats-label-diffused" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="0.9" />
+              </filter>
+            </defs>
+
+            {/* Offset 3D shadow */}
+            <circle cx="100" cy="106" r="92" fill="#1E1B2E" opacity="0.20" />
+
+            {/* White ceramic rim with crisp dark outline */}
+            <circle
+              cx="100"
+              cy="100"
+              r="92"
+              fill="url(#fats-white-rim)"
+              stroke="#1E1B2E"
+              strokeWidth="4.5"
+            />
+
+            {/* Inner circular golden-oil bowl */}
+            <g clipPath="url(#fats-inner-circle-clip)">
+              <circle cx="100" cy="100" r="80" fill="url(#sector-healthy-fats)" />
+
+              {/* Diffused "GRASAS" label — centered inside the circular fats plate, auto-removed when food is placed */}
+              {plate.fats.length === 0 && (
+                <text
+                  data-testid="plate-label-fats"
+                  x="100"
+                  y="100"
+                  textAnchor="middle"
+                  dominantBaseline="central"
+                  fontSize="24"
+                  fontWeight="700"
+                  letterSpacing="1.1"
+                  fill="#ffffff"
+                  fillOpacity="0.78"
+                  filter="url(#fats-label-diffused)"
+                  style={{ fontFamily: 'var(--font-display)' }}
+                >
+                  GRASAS
+                </text>
+              )}
+
+              <circle cx="100" cy="100" r="80" fill="url(#fats-well-depth)" />
+              <path
+                d="M 32 108 C 35 54, 78 26, 140 29 C 118 58, 88 96, 64 156 C 42 142, 30 126, 32 108 Z"
+                fill="url(#fats-specular-sheen)"
+              />
+
+              {fatsActive && (
+                <circle
+                  cx="100"
+                  cy="100"
+                  r="77"
+                  fill="#ffffff"
+                  fillOpacity="0.22"
+                  stroke="#1E1B2E"
+                  strokeWidth="4"
+                  strokeDasharray="8 6"
+                />
+              )}
+            </g>
+
+            {/* Inner porcelain lip */}
+            <circle
+              cx="100"
+              cy="100"
+              r="80"
+              fill="none"
+              stroke="#1E1B2E"
+              strokeOpacity="0.36"
+              strokeWidth="2.8"
+            />
+            <circle
+              cx="100"
+              cy="100"
+              r="78"
+              fill="none"
+              stroke="#ffffff"
+              strokeOpacity="0.78"
+              strokeWidth="1.6"
+            />
+          </svg>
+
+          {/* Interactive Fats Bowl Overlay (160 / 216 = 74.07% -> inset 12.96%) */}
+          <div
+            ref={fatsBowlRef}
+            role="button"
+            tabIndex={0}
+            onClick={(e) => handleSectorActivate(e, 'fats')}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                onSectorClick('fats');
+              }
+            }}
+            onDragOver={(e) => handleDragOver(e, 'fats')}
+            onDragLeave={() => handleDragLeave('fats')}
+            onDrop={(e) => handleDrop(e, 'fats')}
+            aria-label={`Plato de Grasas Saludables, ${plate.fats.length} alimentos`}
+            data-testid="sector-fats"
+            className="pointer-events-auto absolute inset-[12.96%] rounded-full bg-transparent cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#8137ea] overflow-visible [--plated-base:104px] sm:[--plated-base:116px] xl:[--plated-base:128px]"
+          >
+            {renderPlatedSectorItems('fats', plate.fats, 128, fatsBowlRef)}
+          </div>
+        </div>
+      </div>
+
+      {/* MAIN CIRCULAR HEALTHY PLATE — MAXIMIZED TO FILL PLAYFIELD HEIGHT & SHIFTED SLIGHTLY RIGHT */}
       <div
-        className={`relative shrink-0 w-[900px] h-[900px] rounded-full select-none overflow-visible ${
+        className={`pointer-events-none absolute z-20 top-1/2 left-[58.5cqw] -translate-x-1/2 -translate-y-1/2 shrink-0 w-[min(123cqh,96cqw)] h-[min(123cqh,96cqw)] rounded-full select-none overflow-visible ${
           wiggleSector === 'all' ? 'animate-plate-wiggle' : ''
         }`}
         data-testid="healthy-plate"
@@ -705,63 +853,58 @@ export const HealthyPlate: React.FC<HealthyPlateProps> = memo(({
               <stop offset="100%" stopColor="#F3F2F7" />
             </radialGradient>
 
-            {/* Left 50% — Verde Manzana (#5dd118) */}
-            <linearGradient id="sector-apple-green" x1="0%" y1="15%" x2="100%" y2="85%">
-              <stop offset="0%" stopColor={shieldActive ? '#80EB3E' : '#69DF24'} />
-              <stop offset="55%" stopColor={shieldActive ? '#6DE228' : '#5dd118'} />
-              <stop offset="100%" stopColor={shieldActive ? '#5dd118' : '#52BE12'} />
+            {/* Top-Left — Vegetales (Vibrant Vivid Leaf Green) */}
+            <linearGradient id="sector-vegetables-green" x1="0%" y1="10%" x2="100%" y2="85%">
+              <stop offset="0%" stopColor={vegetablesActive ? '#6BFF7A' : '#3CF24E'} />
+              <stop offset="55%" stopColor={vegetablesActive ? '#38E84B' : '#1FD432'} />
+              <stop offset="100%" stopColor={vegetablesActive ? '#1CC730' : '#10AC24'} />
             </linearGradient>
 
-            {/* Top-Right 25% — Rosa Fresa (#fc3e7e) */}
-            <linearGradient id="sector-strawberry-coral" x1="15%" y1="0%" x2="90%" y2="95%">
-              <stop offset="0%" stopColor={proteinActive ? '#FF6A9D' : '#FF558E'} />
-              <stop offset="60%" stopColor={proteinActive ? '#FF528C' : '#fc3e7e'} />
-              <stop offset="100%" stopColor={proteinActive ? '#fc3e7e' : '#EB2B6C'} />
+            {/* Bottom-Left — Frutas (Vibrant Juicy Berry Crimson) */}
+            <linearGradient id="sector-fruits-berry" x1="10%" y1="10%" x2="90%" y2="95%">
+              <stop offset="0%" stopColor={fruitsActive ? '#FF5282' : '#FF2460'} />
+              <stop offset="58%" stopColor={fruitsActive ? '#FA205E' : '#E50E4C'} />
+              <stop offset="100%" stopColor={fruitsActive ? '#D60B45' : '#BD063C'} />
             </linearGradient>
 
-            {/* Bottom-Right 25% — Amarillo Sol (#fee330) */}
-            <linearGradient id="sector-sunny-mango" x1="15%" y1="5%" x2="90%" y2="95%">
-              <stop offset="0%" stopColor={energyActive ? '#FFF078' : '#FFEA54'} />
-              <stop offset="60%" stopColor={energyActive ? '#FFE94D' : '#fee330'} />
-              <stop offset="100%" stopColor={energyActive ? '#fee330' : '#F3D416'} />
+            {/* Top-Right — Cereales (Vibrant Warm Golden-Caramel Grain Brown) */}
+            <linearGradient id="sector-cereals-grain" x1="15%" y1="0%" x2="90%" y2="95%">
+              <stop offset="0%" stopColor={cerealsActive ? '#F0C68D' : '#E0AE6E'} />
+              <stop offset="58%" stopColor={cerealsActive ? '#DBA35D' : '#CA8E47'} />
+              <stop offset="100%" stopColor={cerealsActive ? '#BE823B' : '#AA6E2C'} />
+            </linearGradient>
+
+            {/* Bottom-Right — Proteínas (Vibrant Luminous Tangerine Orange) */}
+            <linearGradient id="sector-protein-orange" x1="15%" y1="5%" x2="90%" y2="95%">
+              <stop offset="0%" stopColor={proteinActive ? '#FFBF52' : '#FFA41B'} />
+              <stop offset="58%" stopColor={proteinActive ? '#FF962E' : '#FF7E0A'} />
+              <stop offset="100%" stopColor={proteinActive ? '#F56D0A' : '#E85C00'} />
             </linearGradient>
 
             {/* Inner Bowl Concave Depth Shadow */}
             <radialGradient id="inner-well-depth" cx="52%" cy="54%" r="54%">
-              <stop offset="66%" stopColor="#ffffff" stopOpacity="0.06" />
-              <stop offset="88%" stopColor="#1E1B2E" stopOpacity="0.06" />
-              <stop offset="100%" stopColor="#1E1B2E" stopOpacity="0.16" />
+              <stop offset="68%" stopColor="#ffffff" stopOpacity="0.06" />
+              <stop offset="88%" stopColor="#1E1B2E" stopOpacity="0.04" />
+              <stop offset="100%" stopColor="#1E1B2E" stopOpacity="0.11" />
             </radialGradient>
 
             {/* Subtle Ceramic Specular Glaze Reflection */}
             <linearGradient id="bowl-specular-sheen" x1="10%" y1="10%" x2="82%" y2="85%">
-              <stop offset="0%" stopColor="#ffffff" stopOpacity="0.34" />
-              <stop offset="48%" stopColor="#ffffff" stopOpacity="0.10" />
+              <stop offset="0%" stopColor="#ffffff" stopOpacity="0.30" />
+              <stop offset="48%" stopColor="#ffffff" stopOpacity="0.08" />
               <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
             </linearGradient>
 
-            {/* External Curved Text Paths Floating Outside the Outer Plate Rim (R = 272 / 280) */}
-            <path
-              id="rim-path-shield"
-              d="M 44.4 393.0 A 272 272 0 0 1 262.1 30.7"
-              fill="none"
-            />
-            <path
-              id="rim-path-protein"
-              d="M 337.9 30.7 A 272 272 0 0 1 569.3 262.1"
-              fill="none"
-            />
-            <path
-              id="rim-path-energy"
-              d="M 339.0 577.3 A 280 280 0 0 0 577.3 339.0"
-              fill="none"
-            />
+            {/* Soft Diffused Watermark Blur for Interior Category Names */}
+            <filter id="plate-label-diffused" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="1.15" />
+            </filter>
           </defs>
 
           {/* Solid 3D Cartoon Offset Shadow Under Plate in #1E1B2E */}
           <circle cx="300" cy="310" r="244" fill="#1E1B2E" opacity="0.22" />
 
-          {/* Thin Pure White (#ffffff) Ceramic Plate Rim with Crisp #1E1B2E Cartoon Border */}
+          {/* Pure White (#ffffff) Ceramic Plate Rim with Crisp #1E1B2E Cartoon Border */}
           <circle
             cx="300"
             cy="300"
@@ -771,149 +914,107 @@ export const HealthyPlate: React.FC<HealthyPlateProps> = memo(({
             strokeWidth="5.5"
           />
 
-          {/* External Curved Labels Floating Outside the Plate with #1E1B2E Cartoon Outline */}
-          <text
-            fill="#5dd118"
+          {/* Subtle Inner Rim Accent Ring matching reference plate */}
+          <circle
+            cx="300"
+            cy="300"
+            r="235"
+            fill="none"
             stroke="#1E1B2E"
-            strokeWidth="5"
-            paintOrder="stroke fill"
-            strokeLinejoin="round"
-            fontSize="26"
-            fontWeight="700"
-            letterSpacing="0.9"
-            dominantBaseline="central"
-            style={{
-              fontFamily: 'var(--font-display)',
-              filter: 'drop-shadow(0 2.5px 0 rgba(30, 27, 46, 0.35))',
-            }}
-          >
-            <textPath href="#rim-path-shield" startOffset="50%" textAnchor="middle">
-              FRUTAS Y HORTALIZAS
-            </textPath>
-          </text>
-
-          <text
-            fill="#fc3e7e"
-            stroke="#1E1B2E"
-            strokeWidth="5"
-            paintOrder="stroke fill"
-            strokeLinejoin="round"
-            fontSize="26"
-            fontWeight="700"
-            letterSpacing="0.9"
-            dominantBaseline="central"
-            style={{
-              fontFamily: 'var(--font-display)',
-              filter: 'drop-shadow(0 2.5px 0 rgba(30, 27, 46, 0.35))',
-            }}
-          >
-            <textPath href="#rim-path-protein" startOffset="50%" textAnchor="middle">
-              PROTEÍNAS
-            </textPath>
-          </text>
-
-          <text
-            fill="#fee330"
-            stroke="#1E1B2E"
-            strokeWidth="5.2"
-            paintOrder="stroke fill"
-            strokeLinejoin="round"
-            fontSize="26"
-            fontWeight="700"
-            letterSpacing="0.9"
-            dominantBaseline="central"
-            style={{
-              fontFamily: 'var(--font-display)',
-              filter: 'drop-shadow(0 2.5px 0 rgba(30, 27, 46, 0.35))',
-            }}
-          >
-            <textPath href="#rim-path-energy" startOffset="50%" textAnchor="middle">
-              ENERGÍA
-            </textPath>
-          </text>
+            strokeOpacity="0.16"
+            strokeWidth="2"
+          />
 
           {/* Expanded Inner Colored Circular Bowl (r = 226) */}
           <g clipPath="url(#plate-inner-circle-clip)">
-            {/* Left 50% Verde Manzana (#5dd118) */}
-            <rect x="74" y="74" width="226" height="452" fill="url(#sector-apple-green)" />
-            {/* Top-Right 25% Rosa Fresa (#fc3e7e) */}
-            <rect x="300" y="74" width="226" height="226" fill="url(#sector-strawberry-coral)" />
-            {/* Bottom-Right 25% Amarillo Sol (#fee330) */}
-            <rect x="300" y="300" width="226" height="226" fill="url(#sector-sunny-mango)" />
+            {/* Top-Left (~34%) — Vegetales */}
+            <rect x="74" y="74" width="226" height="289.3" fill="url(#sector-vegetables-green)" />
+            {/* Bottom-Left (~16%) — Frutas */}
+            <rect x="74" y="363.3" width="226" height="162.7" fill="url(#sector-fruits-berry)" />
+            {/* Top-Right (25%) — Cereales */}
+            <rect x="300" y="74" width="226" height="226" fill="url(#sector-cereals-grain)" />
+            {/* Bottom-Right (25%) — Proteínas */}
+            <rect x="300" y="300" width="226" height="226" fill="url(#sector-protein-orange)" />
 
-            {/* High-Contrast Zone Percentages */}
-            {/* 50% in #ffffff with subtle #1E1B2E shadow */}
-            <text
-              x="194"
-              y="305"
-              textAnchor="middle"
-              dominantBaseline="central"
-              fontSize="68"
-              fontWeight="700"
-              fill="#1E1B2E"
-              fillOpacity="0.28"
-              style={{ fontFamily: 'var(--font-display)' }}
-            >
-              50%
-            </text>
-            <text
-              x="194"
-              y="301"
-              textAnchor="middle"
-              dominantBaseline="central"
-              fontSize="68"
-              fontWeight="700"
-              fill="#ffffff"
-              fillOpacity="0.88"
-              style={{ fontFamily: 'var(--font-display)' }}
-            >
-              50%
-            </text>
+            {/* Softly Diffused Interior Section Names (Removed Automatically When Any Food Is Added) */}
+            {plate.vegetables.length === 0 && (
+              <text
+                data-testid="plate-label-vegetables"
+                x="196"
+                y="246"
+                textAnchor="middle"
+                dominantBaseline="central"
+                fontSize="31"
+                fontWeight="700"
+                letterSpacing="1.2"
+                fill="#ffffff"
+                fillOpacity="0.72"
+                filter="url(#plate-label-diffused)"
+                style={{ fontFamily: 'var(--font-display)' }}
+              >
+                VEGETALES
+              </text>
+            )}
 
-            {/* 25% Proteínas in #ffffff with subtle #1E1B2E shadow */}
-            <text
-              x="404"
-              y="206"
-              textAnchor="middle"
-              dominantBaseline="central"
-              fontSize="50"
-              fontWeight="700"
-              fill="#1E1B2E"
-              fillOpacity="0.25"
-              style={{ fontFamily: 'var(--font-display)' }}
-            >
-              25%
-            </text>
-            <text
-              x="404"
-              y="202"
-              textAnchor="middle"
-              dominantBaseline="central"
-              fontSize="50"
-              fontWeight="700"
-              fill="#ffffff"
-              fillOpacity="0.90"
-              style={{ fontFamily: 'var(--font-display)' }}
-            >
-              25%
-            </text>
+            {plate.fruits.length === 0 && (
+              <text
+                data-testid="plate-label-fruits"
+                x="222"
+                y="432"
+                textAnchor="middle"
+                dominantBaseline="central"
+                fontSize="29"
+                fontWeight="700"
+                letterSpacing="1.2"
+                fill="#ffffff"
+                fillOpacity="0.74"
+                filter="url(#plate-label-diffused)"
+                style={{ fontFamily: 'var(--font-display)' }}
+              >
+                FRUTAS
+              </text>
+            )}
 
-            {/* 25% Energía in #1E1B2E for crisp contrast on #fee330 */}
-            <text
-              x="404"
-              y="398"
-              textAnchor="middle"
-              dominantBaseline="central"
-              fontSize="50"
-              fontWeight="700"
-              fill="#1E1B2E"
-              fillOpacity="0.58"
-              style={{ fontFamily: 'var(--font-display)' }}
-            >
-              25%
-            </text>
+            {plate.cereals.length === 0 && (
+              <text
+                data-testid="plate-label-cereals"
+                x="404"
+                y="204"
+                textAnchor="middle"
+                dominantBaseline="central"
+                fontSize="31"
+                fontWeight="700"
+                letterSpacing="1.2"
+                fill="#ffffff"
+                fillOpacity="0.74"
+                filter="url(#plate-label-diffused)"
+                style={{ fontFamily: 'var(--font-display)' }}
+              >
+                CEREALES
+              </text>
+            )}
+
+            {plate.protein.length === 0 && (
+              <text
+                data-testid="plate-label-protein"
+                x="404"
+                y="398"
+                textAnchor="middle"
+                dominantBaseline="central"
+                fontSize="30"
+                fontWeight="700"
+                letterSpacing="1.2"
+                fill="#ffffff"
+                fillOpacity="0.74"
+                filter="url(#plate-label-diffused)"
+                style={{ fontFamily: 'var(--font-display)' }}
+              >
+                PROTEÍNAS
+              </text>
+            )}
 
             {/* Crisp #ffffff Ceramic Dividers with subtle #1E1B2E edge */}
+            {/* Vertical center divider */}
             <line
               x1="300"
               y1="74"
@@ -923,6 +1024,17 @@ export const HealthyPlate: React.FC<HealthyPlateProps> = memo(({
               strokeOpacity="0.22"
               strokeWidth="9"
             />
+            {/* Left horizontal divider (Vegetales / Frutas at y = 363.3) */}
+            <line
+              x1="74"
+              y1="363.3"
+              x2="300"
+              y2="363.3"
+              stroke="#1E1B2E"
+              strokeOpacity="0.22"
+              strokeWidth="9"
+            />
+            {/* Right horizontal divider (Cereales / Proteínas at y = 300) */}
             <line
               x1="300"
               y1="300"
@@ -932,11 +1044,20 @@ export const HealthyPlate: React.FC<HealthyPlateProps> = memo(({
               strokeOpacity="0.22"
               strokeWidth="9"
             />
+
             <line
               x1="300"
               y1="74"
               x2="300"
               y2="526"
+              stroke="#ffffff"
+              strokeWidth="5.5"
+            />
+            <line
+              x1="74"
+              y1="363.3"
+              x2="300"
+              y2="363.3"
               stroke="#ffffff"
               strokeWidth="5.5"
             />
@@ -957,9 +1078,9 @@ export const HealthyPlate: React.FC<HealthyPlateProps> = memo(({
             />
 
             {/* Active Drop/Selection Glow Highlights */}
-            {shieldActive && (
+            {vegetablesActive && (
               <path
-                d="M 297 76 A 224 224 0 0 0 297 524 Z"
+                d="M 297 76 A 224 224 0 0 0 84.3 360.3 L 297 360.3 Z"
                 fill="#ffffff"
                 fillOpacity="0.20"
                 stroke="#ffffff"
@@ -967,7 +1088,17 @@ export const HealthyPlate: React.FC<HealthyPlateProps> = memo(({
                 strokeDasharray="10 7"
               />
             )}
-            {proteinActive && (
+            {fruitsActive && (
+              <path
+                d="M 86.0 366.3 A 224 224 0 0 0 297 524 L 297 366.3 Z"
+                fill="#ffffff"
+                fillOpacity="0.20"
+                stroke="#ffffff"
+                strokeWidth="5.5"
+                strokeDasharray="10 7"
+              />
+            )}
+            {cerealsActive && (
               <path
                 d="M 303 76 A 224 224 0 0 1 524 297 L 303 297 Z"
                 fill="#ffffff"
@@ -977,13 +1108,13 @@ export const HealthyPlate: React.FC<HealthyPlateProps> = memo(({
                 strokeDasharray="10 7"
               />
             )}
-            {energyActive && (
+            {proteinActive && (
               <path
                 d="M 303 303 L 524 303 A 224 224 0 0 1 303 524 Z"
                 fill="#ffffff"
                 fillOpacity="0.22"
-                stroke="#1E1B2E"
-                strokeWidth="4.5"
+                stroke="#ffffff"
+                strokeWidth="5.5"
                 strokeDasharray="10 7"
               />
             )}
@@ -1010,93 +1141,113 @@ export const HealthyPlate: React.FC<HealthyPlateProps> = memo(({
           />
         </svg>
 
-        {/* Interactive Sector Overlay aligned 1:1 with the expanded circular bowl (452 / 620 = 72.9% -> inset 13.55%) */}
+        {/* Interactive Sector Overlay aligned 1:1 with the circular bowl (452 / 620 = 72.9% -> inset 13.55%) */}
         <div
           ref={bowlRef}
-          className="absolute inset-[13.55%] rounded-full grid grid-cols-2 grid-rows-2 isolate overflow-visible"
+          className="pointer-events-none absolute inset-[13.55%] rounded-full flex isolate overflow-visible"
         >
-          {/* SECTOR 1: 50% LEFT HALF — Frutas y Hortalizas */}
-          <div
-            role="button"
-            tabIndex={0}
-            onClick={(e) => handleSectorActivate(e, 'shield')}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                onSectorClick('shield');
-              }
-            }}
-            onDragOver={(e) => handleDragOver(e, 'shield')}
-            onDragLeave={() => handleDragLeave('shield')}
-            onDrop={(e) => handleDrop(e, 'shield')}
-            aria-label={`Sector Frutas y Hortalizas, ${plate.shield.length} alimentos`}
-            data-testid="sector-shield"
-            className={`row-span-2 col-span-1 relative bg-transparent cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#8137ea] rounded-l-full overflow-visible [--plated-base:112px] sm:[--plated-base:128px] xl:[--plated-base:144px] ${
-              wiggleSector === 'shield' ? 'animate-plate-wiggle' : ''
-            }`}
-          >
-            {renderPlatedSectorItems('shield', plate.shield, 144)}
+          {/* LEFT HALF: 64% Vegetales (top) + 36% Frutas (bottom) */}
+          <div className="pointer-events-none relative w-1/2 h-full flex flex-col overflow-visible">
+            {/* SECTOR 1: TOP-LEFT — Vegetales */}
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={(e) => handleSectorActivate(e, 'vegetables')}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  onSectorClick('vegetables');
+                }
+              }}
+              onDragOver={(e) => handleDragOver(e, 'vegetables')}
+              onDragLeave={() => handleDragLeave('vegetables')}
+              onDrop={(e) => handleDrop(e, 'vegetables')}
+              aria-label={`Sector Vegetales, ${plate.vegetables.length} alimentos`}
+              data-testid="sector-vegetables"
+              className={`pointer-events-auto h-[64%] w-full relative bg-transparent cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#8137ea] rounded-tl-full overflow-visible [--plated-base:94px] sm:[--plated-base:106px] xl:[--plated-base:118px] ${
+                wiggleSector === 'vegetables' ? 'animate-plate-wiggle' : ''
+              }`}
+            >
+              {renderPlatedSectorItems('vegetables', plate.vegetables, 118, bowlRef)}
+            </div>
 
-            {rainbowActive && (
-              <span
-                data-testid="rainbow-badge"
-                className="pointer-events-none absolute bottom-2 left-1/2 -translate-x-1/2 whitespace-nowrap font-display text-xs sm:text-sm font-bold text-[#1E1B2E] bg-[#fee330] px-3 py-0.5 rounded-xl border-2 border-[#1E1B2E] shadow-[0_3px_0_#1E1B2E] z-[9999]"
-              >
-                ¡Plato Arcoíris!
-              </span>
-            )}
+            {/* SECTOR 2: BOTTOM-LEFT — Frutas */}
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={(e) => handleSectorActivate(e, 'fruits')}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  onSectorClick('fruits');
+                }
+              }}
+              onDragOver={(e) => handleDragOver(e, 'fruits')}
+              onDragLeave={() => handleDragLeave('fruits')}
+              onDrop={(e) => handleDrop(e, 'fruits')}
+              aria-label={`Sector Frutas, ${plate.fruits.length} alimentos`}
+              data-testid="sector-fruits"
+              className={`pointer-events-auto h-[36%] w-full relative bg-transparent cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#8137ea] rounded-bl-full overflow-visible [--plated-base:84px] sm:[--plated-base:94px] xl:[--plated-base:106px] ${
+                wiggleSector === 'fruits' ? 'animate-plate-wiggle' : ''
+              }`}
+            >
+              {renderPlatedSectorItems('fruits', plate.fruits, 106, bowlRef)}
+            </div>
           </div>
 
-          {/* SECTOR 2: 25% TOP-RIGHT — Proteínas */}
-          <div
-            role="button"
-            tabIndex={0}
-            onClick={(e) => handleSectorActivate(e, 'protein')}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                onSectorClick('protein');
-              }
-            }}
-            onDragOver={(e) => handleDragOver(e, 'protein')}
-            onDragLeave={() => handleDragLeave('protein')}
-            onDrop={(e) => handleDrop(e, 'protein')}
-            aria-label={`Sector Proteínas, ${proteinItems.length ? proteinItems.map((p) => p.name).join(', ') : 'vacío'}`}
-            data-testid="sector-protein"
-            className={`col-span-1 row-span-1 relative bg-transparent cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#8137ea] rounded-tr-full overflow-visible [--plated-base:96px] sm:[--plated-base:112px] xl:[--plated-base:132px] ${
-              wiggleSector === 'protein' ? 'animate-plate-wiggle' : ''
-            }`}
-          >
-            {renderPlatedSectorItems('protein', proteinItems, 132)}
-          </div>
+          {/* RIGHT HALF: 50% Cereales (top) + 50% Proteínas (bottom) */}
+          <div className="pointer-events-none relative w-1/2 h-full flex flex-col overflow-visible">
+            {/* SECTOR 3: TOP-RIGHT — Cereales */}
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={(e) => handleSectorActivate(e, 'cereals')}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  onSectorClick('cereals');
+                }
+              }}
+              onDragOver={(e) => handleDragOver(e, 'cereals')}
+              onDragLeave={() => handleDragLeave('cereals')}
+              onDrop={(e) => handleDrop(e, 'cereals')}
+              aria-label={`Sector Cereales, ${plate.cereals.length ? plate.cereals.map((c) => c.name).join(', ') : 'vacío'}`}
+              data-testid="sector-cereals"
+              className={`pointer-events-auto h-1/2 w-full relative bg-transparent cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#8137ea] rounded-tr-full overflow-visible [--plated-base:90px] sm:[--plated-base:102px] xl:[--plated-base:114px] ${
+                wiggleSector === 'cereals' ? 'animate-plate-wiggle' : ''
+              }`}
+            >
+              {renderPlatedSectorItems('cereals', plate.cereals, 114, bowlRef)}
+            </div>
 
-          {/* SECTOR 3: 25% BOTTOM-RIGHT — Energía */}
-          <div
-            role="button"
-            tabIndex={0}
-            onClick={(e) => handleSectorActivate(e, 'energy')}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                onSectorClick('energy');
-              }
-            }}
-            onDragOver={(e) => handleDragOver(e, 'energy')}
-            onDragLeave={() => handleDragLeave('energy')}
-            onDrop={(e) => handleDrop(e, 'energy')}
-            aria-label={`Sector Energía, ${energyItems.length ? energyItems.map((eItem) => eItem.name).join(', ') : 'vacío'}`}
-            data-testid="sector-energy"
-            className={`col-span-1 row-span-1 relative bg-transparent cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#8137ea] rounded-br-full overflow-visible [--plated-base:96px] sm:[--plated-base:112px] xl:[--plated-base:132px] ${
-              wiggleSector === 'energy' ? 'animate-plate-wiggle' : ''
-            }`}
-          >
-            {renderPlatedSectorItems('energy', energyItems, 132)}
+            {/* SECTOR 4: BOTTOM-RIGHT — Proteínas */}
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={(e) => handleSectorActivate(e, 'protein')}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  onSectorClick('protein');
+                }
+              }}
+              onDragOver={(e) => handleDragOver(e, 'protein')}
+              onDragLeave={() => handleDragLeave('protein')}
+              onDrop={(e) => handleDrop(e, 'protein')}
+              aria-label={`Sector Proteínas, ${plate.protein.length ? plate.protein.map((p) => p.name).join(', ') : 'vacío'}`}
+              data-testid="sector-protein"
+              className={`pointer-events-auto h-1/2 w-full relative bg-transparent cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#8137ea] rounded-br-full overflow-visible [--plated-base:90px] sm:[--plated-base:102px] xl:[--plated-base:114px] ${
+                wiggleSector === 'protein' ? 'animate-plate-wiggle' : ''
+              }`}
+            >
+              {renderPlatedSectorItems('protein', plate.protein, 114, bowlRef)}
+            </div>
           </div>
         </div>
       </div>
 
-      {/* HYDRATION GLASS SECTION IN BOTTOM-RIGHT USING REFERENCE ARTWORK */}
-      <div className="absolute bottom-1 right-1 sm:bottom-2 sm:right-2 z-20 flex flex-col items-center">
+      {/* HYDRATION GLASS SECTION — ENLARGED IN BOTTOM-RIGHT CORNER CLOSE TO MAIN PLATE */}
+      <div className="absolute bottom-0 right-0 sm:bottom-1 sm:right-1 xl:bottom-1 xl:right-1.5 z-30 flex flex-col items-center">
         <button
           type="button"
           onClick={() => {
@@ -1112,7 +1263,7 @@ export const HealthyPlate: React.FC<HealthyPlateProps> = memo(({
           aria-label={`Vaso de Hidratación, ${isHydrated ? 'lleno de Agua Pura' : 'vacío'}`}
           title={isHydrated && !selectedFood ? 'Toca para vaciar el vaso' : 'Añade Agua Pura aquí'}
           data-testid="sector-hydration"
-          className={`food-option group relative w-[144px] sm:w-[158px] flex flex-col items-center cursor-pointer transition-transform duration-150 ease-[cubic-bezier(0.22,1,0.36,1)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#8137ea] rounded-3xl p-1.5 ${
+          className={`food-option group relative w-[min(22cqh,16.5cqw)] flex flex-col items-center cursor-pointer transition-transform duration-150 ease-[cubic-bezier(0.22,1,0.36,1)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#8137ea] rounded-3xl p-1 ${
             hydrationActive ? 'scale-110' : 'hover:scale-105'
           } ${wiggleSector === 'hydration' ? 'animate-plate-wiggle' : ''}`}
         >
@@ -1120,17 +1271,15 @@ export const HealthyPlate: React.FC<HealthyPlateProps> = memo(({
             <BurstParticles color="#4efcfb" />
           )}
 
-          {/* Reference Water Glass Container */}
-          <div className="relative flex items-center justify-center w-[112px] h-[126px] sm:w-[126px] sm:h-[142px] xl:w-[138px] xl:h-[156px]">
-            {/* Target highlight ring when dragging/selecting water */}
+          {/* Enlarged Water Glass Container Close to Main Plate */}
+          <div className="relative flex items-center justify-center w-[min(20cqh,15.5cqw)] h-[min(26cqh,20cqw)]">
             {hydrationActive && (
               <span
                 aria-hidden="true"
-                className="pointer-events-none absolute -inset-2 rounded-[28px] bg-[#4efcfb]/30 border-[3px] border-dashed border-[#1E1B2E]"
+                className="pointer-events-none absolute -inset-2 rounded-[24px] bg-[#4efcfb]/30 border-[3px] border-dashed border-[#1E1B2E]"
               />
             )}
 
-            {/* Soft luminous aura when hydrated */}
             {isHydrated && (
               <span
                 aria-hidden="true"
@@ -1164,13 +1313,6 @@ export const HealthyPlate: React.FC<HealthyPlateProps> = memo(({
               </div>
             </div>
           </div>
-
-          <span className="font-display title-label-stroke-dark -mt-1 text-base sm:text-lg font-bold text-[#4efcfb] leading-none">
-            Hidratación
-          </span>
-          <span className="text-[11px] sm:text-xs font-extrabold text-[#1E1B2E] mt-1 whitespace-nowrap">
-            {isHydrated ? '¡Agua Pura!' : 'Toca o arrastra agua'}
-          </span>
         </button>
       </div>
     </div>

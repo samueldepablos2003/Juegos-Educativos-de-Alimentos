@@ -11,27 +11,13 @@ import { MAX_VISIBLE_PER_SECTOR } from './platingPhysics';
 
 export function createInitialPlate(): PlateState {
   return {
-    shield: [],
-    protein: null,
-    extraProteins: [],
-    energy: null,
-    extraEnergies: [],
+    vegetables: [],
+    fruits: [],
+    cereals: [],
+    protein: [],
+    fats: [],
     hydration: null,
   };
-}
-
-export function getProteinItems(plate: PlateState): FoodItem[] {
-  return [
-    ...(plate.protein ? [plate.protein] : []),
-    ...(plate.extraProteins ?? []),
-  ];
-}
-
-export function getEnergyItems(plate: PlateState): FoodItem[] {
-  return [
-    ...(plate.energy ? [plate.energy] : []),
-    ...(plate.extraEnergies ?? []),
-  ];
 }
 
 export function createInitialVolunteerStats(): VolunteerStats {
@@ -54,12 +40,15 @@ export function getExpectedSectorForCategory(
 ): SectorId | null {
   switch (category) {
     case 'vegetable':
+      return 'vegetables';
     case 'fruit':
-      return 'shield';
+      return 'fruits';
+    case 'carb':
+      return 'cereals';
     case 'protein':
       return 'protein';
-    case 'carb':
-      return 'energy';
+    case 'fat':
+      return 'fats';
     case 'water':
       return 'hydration';
     case 'distractor':
@@ -69,39 +58,47 @@ export function getExpectedSectorForCategory(
 
 export function getSectorLabel(sector: SectorId): string {
   switch (sector) {
-    case 'shield':
-      return 'Frutas y Hortalizas';
+    case 'vegetables':
+      return 'Vegetales';
+    case 'fruits':
+      return 'Frutas';
+    case 'cereals':
+      return 'Cereales';
     case 'protein':
       return 'Proteínas';
-    case 'energy':
-      return 'Energía';
+    case 'fats':
+      return 'Grasas';
     case 'hydration':
       return 'Hidratación';
   }
 }
 
-export function isRainbowPlate(shieldItems: FoodItem[]): boolean {
-  if (shieldItems.length < 2) return false;
+export function isRainbowPlate(produceItems: FoodItem[]): boolean {
+  if (produceItems.length < 2) return false;
   const colors = new Set(
-    shieldItems.map((item) => item.rainbowColor).filter(Boolean)
+    produceItems.map((item) => item.rainbowColor).filter(Boolean)
   );
   return colors.size >= 2;
 }
 
 export function isPlateComplete(plate: PlateState): boolean {
   return (
-    plate.shield.length >= 2 &&
-    plate.protein !== null &&
-    plate.energy !== null &&
+    plate.vegetables.length >= 1 &&
+    plate.fruits.length >= 1 &&
+    plate.cereals.length >= 1 &&
+    plate.protein.length >= 1 &&
+    plate.fats.length >= 1 &&
     plate.hydration !== null
   );
 }
 
 export function countFilledSlots(plate: PlateState): number {
   return (
-    Math.min(plate.shield.length, 2) +
-    (plate.protein ? 1 : 0) +
-    (plate.energy ? 1 : 0) +
+    (plate.vegetables.length > 0 ? 1 : 0) +
+    (plate.fruits.length > 0 ? 1 : 0) +
+    (plate.cereals.length > 0 ? 1 : 0) +
+    (plate.protein.length > 0 ? 1 : 0) +
+    (plate.fats.length > 0 ? 1 : 0) +
     (plate.hydration ? 1 : 0)
   );
 }
@@ -153,43 +150,20 @@ export function evaluateFoodPlacement(
     };
   }
 
-  if (expectedSector === 'shield') {
-    const updatedShield = [...plate.shield, food].slice(-MAX_VISIBLE_PER_SECTOR);
-    const updatedPlate: PlateState = {
-      ...plate,
-      shield: updatedShield,
-    };
-    const rainbowNow = isRainbowPlate(updatedShield);
-    const completeNow = isPlateComplete(updatedPlate);
-
-    let message = `${food.name}: ${food.speechText}`;
-    if (updatedShield.length === 2) {
-      if (rainbowNow) {
-        message = `¡Plato Arcoíris! Combinaste dos colores distintos. ${food.speechText}`;
-      } else {
-        message = `¡Genial! Completaste el Escudo Protector. Consejo: prueba 2 colores distintos para lograr el Plato Arcoíris.`;
-      }
+  if (expectedSector === 'hydration') {
+    if (plate.hydration !== null) {
+      return {
+        accepted: false,
+        reason: 'duplicate_food',
+        updatedPlate: plate,
+        unlockedRainbow: false,
+        isPlateComplete: isPlateComplete(plate),
+        message: '¡Tu vaso ya está lleno con Agua Pura fresca!',
+        targetSector: 'hydration',
+      };
     }
 
-    return {
-      accepted: true,
-      reason: 'placed',
-      updatedPlate,
-      unlockedRainbow: rainbowNow && updatedShield.length === 2,
-      isPlateComplete: completeNow,
-      message,
-      targetSector: 'shield',
-    };
-  }
-
-  if (expectedSector === 'protein') {
-    const existingProteins = getProteinItems(plate);
-    const nextProteins = [...existingProteins, food].slice(-MAX_VISIBLE_PER_SECTOR);
-    const updatedPlate: PlateState = {
-      ...plate,
-      protein: nextProteins[0] ?? null,
-      extraProteins: nextProteins.slice(1),
-    };
+    const updatedPlate: PlateState = { ...plate, hydration: food };
     return {
       accepted: true,
       reason: 'placed',
@@ -197,51 +171,39 @@ export function evaluateFoodPlacement(
       unlockedRainbow: false,
       isPlateComplete: isPlateComplete(updatedPlate),
       message: `${food.name}: ${food.speechText}`,
-      targetSector: 'protein',
-    };
-  }
-
-  if (expectedSector === 'energy') {
-    const existingEnergies = getEnergyItems(plate);
-    const nextEnergies = [...existingEnergies, food].slice(-MAX_VISIBLE_PER_SECTOR);
-    const updatedPlate: PlateState = {
-      ...plate,
-      energy: nextEnergies[0] ?? null,
-      extraEnergies: nextEnergies.slice(1),
-    };
-    return {
-      accepted: true,
-      reason: 'placed',
-      updatedPlate,
-      unlockedRainbow: false,
-      isPlateComplete: isPlateComplete(updatedPlate),
-      message: `${food.name}: ${food.speechText}`,
-      targetSector: 'energy',
-    };
-  }
-
-  // Hydration
-  if (plate.hydration !== null) {
-    return {
-      accepted: false,
-      reason: 'duplicate_food',
-      updatedPlate: plate,
-      unlockedRainbow: false,
-      isPlateComplete: isPlateComplete(plate),
-      message: '¡Tu vaso ya está lleno con Agua Pura fresca!',
       targetSector: 'hydration',
     };
   }
 
-  const updatedPlate: PlateState = { ...plate, hydration: food };
+  const wasRainbow = isRainbowPlate([...plate.vegetables, ...plate.fruits]);
+  const nextSectorItems = [...plate[expectedSector], food].slice(-MAX_VISIBLE_PER_SECTOR);
+  const updatedPlate: PlateState = {
+    ...plate,
+    [expectedSector]: nextSectorItems,
+  };
+
+  const rainbowNow = isRainbowPlate([
+    ...updatedPlate.vegetables,
+    ...updatedPlate.fruits,
+  ]);
+  const unlockedRainbow =
+    (expectedSector === 'vegetables' || expectedSector === 'fruits') &&
+    !wasRainbow &&
+    rainbowNow;
+  const completeNow = isPlateComplete(updatedPlate);
+
+  const message = unlockedRainbow
+    ? `¡Plato Arcoíris! Combinaste colores distintos de frutas y vegetales. ${food.speechText}`
+    : `${food.name}: ${food.speechText}`;
+
   return {
     accepted: true,
     reason: 'placed',
     updatedPlate,
-    unlockedRainbow: false,
-    isPlateComplete: isPlateComplete(updatedPlate),
-    message: `${food.name}: ${food.speechText}`,
-    targetSector: 'hydration',
+    unlockedRainbow,
+    isPlateComplete: completeNow,
+    message,
+    targetSector: expectedSector,
   };
 }
 
@@ -250,40 +212,20 @@ export function removeFoodFromPlate(
   sector: SectorId,
   itemIndex?: number
 ): PlateState {
-  if (sector === 'shield') {
-    if (typeof itemIndex === 'number') {
-      return {
-        ...plate,
-        shield: plate.shield.filter((_, idx) => idx !== itemIndex),
-      };
-    }
-    return { ...plate, shield: plate.shield.slice(0, -1) };
+  if (sector === 'hydration') {
+    return { ...plate, hydration: null };
   }
-  if (sector === 'protein') {
-    const items = getProteinItems(plate);
-    const next =
-      typeof itemIndex === 'number'
-        ? items.filter((_, idx) => idx !== itemIndex)
-        : items.slice(0, -1);
-    return {
-      ...plate,
-      protein: next[0] ?? null,
-      extraProteins: next.slice(1),
-    };
-  }
-  if (sector === 'energy') {
-    const items = getEnergyItems(plate);
-    const next =
-      typeof itemIndex === 'number'
-        ? items.filter((_, idx) => idx !== itemIndex)
-        : items.slice(0, -1);
-    return {
-      ...plate,
-      energy: next[0] ?? null,
-      extraEnergies: next.slice(1),
-    };
-  }
-  return { ...plate, hydration: null };
+
+  const currentItems = plate[sector];
+  const nextItems =
+    typeof itemIndex === 'number'
+      ? currentItems.filter((_, idx) => idx !== itemIndex)
+      : currentItems.slice(0, -1);
+
+  return {
+    ...plate,
+    [sector]: nextItems,
+  };
 }
 
 export function filterFoods(
@@ -297,14 +239,16 @@ export function filterFoods(
   switch (tab) {
     case 'all':
       return modeFoods;
-    case 'shield':
-      return modeFoods.filter(
-        (f) => f.category === 'vegetable' || f.category === 'fruit'
-      );
+    case 'vegetables':
+      return modeFoods.filter((f) => f.category === 'vegetable');
+    case 'fruits':
+      return modeFoods.filter((f) => f.category === 'fruit');
+    case 'cereals':
+      return modeFoods.filter((f) => f.category === 'carb');
     case 'protein':
       return modeFoods.filter((f) => f.category === 'protein');
-    case 'energy':
-      return modeFoods.filter((f) => f.category === 'carb');
+    case 'fats':
+      return modeFoods.filter((f) => f.category === 'fat');
     case 'drinks':
       return modeFoods.filter(
         (f) =>
@@ -324,7 +268,7 @@ export function recordCompletedPlateStats(
   mode: GameMode,
   nowIso: string
 ): VolunteerStats {
-  const rainbow = isRainbowPlate(plate.shield);
+  const rainbow = isRainbowPlate([...plate.vegetables, ...plate.fruits]);
   const hadWater = plate.hydration?.id === 'agua';
 
   return {

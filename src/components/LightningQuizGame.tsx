@@ -6,8 +6,6 @@ import {
   Clock,
   Gamepad2,
   Home,
-  Maximize2,
-  Minimize2,
   RotateCcw,
   Trophy,
   Users,
@@ -59,8 +57,6 @@ import { MinigameTutorialScreen } from './MinigameTutorialScreen';
 import { SoundToggleButton } from './SoundToggleButton';
 
 interface LightningQuizGameProps {
-  isFullscreen: boolean;
-  onToggleFullscreen: () => void;
   onBackToLibrary: () => void;
 }
 
@@ -550,8 +546,6 @@ const TeamPanelCard: React.FC<TeamPanelCardProps> = ({
 };
 
 export const LightningQuizGame: React.FC<LightningQuizGameProps> = ({
-  isFullscreen,
-  onToggleFullscreen,
   onBackToLibrary,
 }) => {
   const [screen, setScreen] = useState<QuizScreenView>('guide');
@@ -830,8 +824,6 @@ export const LightningQuizGame: React.FC<LightningQuizGameProps> = ({
       <MinigameTutorialScreen
         gameTitle="Cuestionario Relámpago"
         slides={LIGHTNING_TUTORIAL_SLIDES}
-        isFullscreen={isFullscreen}
-        onToggleFullscreen={onToggleFullscreen}
         onBackToLibrary={onBackToLibrary}
         onOpenModeSelector={() => setScreen('config')}
         ctaLabel={
@@ -852,8 +844,6 @@ export const LightningQuizGame: React.FC<LightningQuizGameProps> = ({
     return (
       <LightningQuizConfigScreen
         initialConfig={config}
-        isFullscreen={isFullscreen}
-        onToggleFullscreen={onToggleFullscreen}
         onBackToLibrary={onBackToLibrary}
         onOpenGuide={() => {
           setReturnScreen('config');
@@ -1055,29 +1045,6 @@ export const LightningQuizGame: React.FC<LightningQuizGameProps> = ({
           </button>
 
           <SoundToggleButton />
-
-          <button
-            type="button"
-            data-testid="fullscreen-btn"
-            onClick={onToggleFullscreen}
-            aria-pressed={isFullscreen}
-            aria-label={
-              isFullscreen
-                ? 'Salir de pantalla completa'
-                : 'Pantalla completa para TV'
-            }
-            className={`hidden sm:flex p-2.5 rounded-2xl border-2 border-[#1E1B2E] shadow-[0_4px_0_#1E1B2E] active:translate-y-[3px] cursor-pointer shrink-0 transition-[transform,background-color] duration-150 ${
-              isFullscreen
-                ? 'bg-[#fee330] hover:bg-[#f5d81d] text-[#1E1B2E]'
-                : 'bg-[#8137ea] hover:bg-[#7028d9] text-[#ffffff]'
-            }`}
-          >
-            {isFullscreen ? (
-              <Minimize2 className="w-5 h-5" aria-hidden="true" />
-            ) : (
-              <Maximize2 className="w-5 h-5" aria-hidden="true" />
-            )}
-          </button>
         </div>
       </header>
 

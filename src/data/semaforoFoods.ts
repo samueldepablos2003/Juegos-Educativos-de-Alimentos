@@ -148,6 +148,42 @@ export const SEMAFORO_FOODS: SemaforoFoodItem[] = [
       '¡Casi! Las galletas rellenas tienen mucha azúcar y grasas; prueba en la luz ocasional.',
     successNote: '¡Correcto! Las galletas rellenas pertenecen a la Luz Roja.',
   },
+  {
+    id: 'sem-pastelito',
+    foodId: 'pastelito',
+    name: 'Pastelito',
+    light: 'red',
+    hintIfWrong:
+      '¡Ojo! Los pastelitos fritos absorben mucha grasa y harina refinada; busca la luz ocasional.',
+    successNote: '¡Muy bien! El pastelito frito va en Luz Roja solo para ocasiones especiales.',
+  },
+  {
+    id: 'sem-azucar',
+    foodId: 'azucar',
+    name: 'Azúcar',
+    light: 'red',
+    hintIfWrong:
+      '¡Cuidado! El azúcar refinado no nutre y daña los dientes; busca la luz a evitar.',
+    successNote: '¡Exacto! El azúcar refinado pertenece a la Luz Roja.',
+  },
+  {
+    id: 'sem-mayonesa',
+    foodId: 'mayonesa',
+    name: 'Mayonesa',
+    light: 'red',
+    hintIfWrong:
+      '¡Ojo! La mayonesa comercial tiene mucha grasa y sal; prueba en la luz ocasional.',
+    successNote: '¡Bien visto! La mayonesa va en Luz Roja; prefiere aguacate o limón.',
+  },
+  {
+    id: 'sem-helado',
+    foodId: 'helado',
+    name: 'Helado',
+    light: 'red',
+    hintIfWrong:
+      '¡Casi! El helado comercial tiene mucha azúcar añadida y grasa; déjalo para la luz ocasional.',
+    successNote: '¡Correcto! El helado pertenece a la Luz Roja para ocasiones especiales.',
+  },
 
   // ================= LUZ AMARILLA (#fee330) =================
   {
@@ -294,6 +330,69 @@ export const SEMAFORO_FOODS: SemaforoFoodItem[] = [
       '¡Casi! La pasta es un carbohidrato que nos da energía rica en porciones medidas.',
     successNote: '¡Excelente! La pasta va en Luz Amarilla con porción equilibrada.',
   },
+  {
+    id: 'sem-cotufas',
+    foodId: 'cotufas',
+    name: 'Cotufas',
+    light: 'yellow',
+    hintIfWrong:
+      '¡Casi! Las cotufas hechas de maíz natural con poca sal se disfrutan en porciones moderadas.',
+    successNote: '¡Muy bien! Las cotufas caseras van en Luz Amarilla con moderación.',
+  },
+  {
+    id: 'sem-mani',
+    foodId: 'mani',
+    name: 'Maní',
+    light: 'yellow',
+    hintIfWrong:
+      '¡Prueba otra luz! El maní aporta proteína vegetal y grasas buenas, pero en porciones pequeñas.',
+    successNote: '¡Súper! Un puñadito de maní natural pertenece a la Luz Amarilla.',
+  },
+  {
+    id: 'sem-casabe',
+    foodId: 'casabe',
+    name: 'Casabe',
+    light: 'yellow',
+    hintIfWrong:
+      '¡Casi! El casabe de yuca aporta energía y fibra en porciones equilibradas.',
+    successNote: '¡Excelente! El casabe forma parte de la Luz Amarilla.',
+  },
+  {
+    id: 'sem-atun',
+    foodId: 'atun',
+    name: 'Atún en Lata',
+    light: 'yellow',
+    hintIfWrong:
+      '¡Prueba otra luz! El atún aporta proteína y Omega-3 para disfrutar en porciones medidas.',
+    successNote: '¡Genial! El atún en lata va en Luz Amarilla.',
+  },
+  {
+    id: 'sem-aceite',
+    foodId: 'aceite',
+    name: 'Aceite',
+    light: 'yellow',
+    hintIfWrong:
+      '¡Ojo! El aceite vegetal se usa solo en chorritos moderados para cocinar o aderezar.',
+    successNote: '¡Correcto! El aceite vegetal en poquita cantidad pertenece a la Luz Amarilla.',
+  },
+  {
+    id: 'sem-yogurt',
+    foodId: 'yogurt',
+    name: 'Yogurt',
+    light: 'yellow',
+    hintIfWrong:
+      '¡Prueba otra luz! El yogurt natural aporta calcio y proteínas en porciones equilibradas.',
+    successNote: '¡Excelente! El yogurt natural pertenece a la Luz Amarilla.',
+  },
+  {
+    id: 'sem-jojoto',
+    foodId: 'jojoto',
+    name: 'Jojoto',
+    light: 'yellow',
+    hintIfWrong:
+      '¡Casi! El jojoto es maíz tierno que nos da energía y fibra en porciones medidas.',
+    successNote: '¡Muy bien! El jojoto forma parte de la Luz Amarilla.',
+  },
 
   // ================= LUZ VERDE (#5dd118) =================
   {
@@ -325,7 +424,7 @@ export const SEMAFORO_FOODS: SemaforoFoodItem[] = [
   },
   {
     id: 'sem-lechuga',
-    foodId: 'repollo',
+    foodId: 'lechuga',
     name: 'Lechuga',
     light: 'green',
     hintIfWrong:
@@ -493,5 +592,59 @@ export const SEMAFORO_FOODS: SemaforoFoodItem[] = [
     hintIfWrong:
       '¡Casi! La mandarina es una fruta fresca natural llena de vitamina C para todos los días.',
     successNote: '¡Luz verde! La mandarina fortalece tus defensas todos los días.',
+  },
+  {
+    id: 'sem-uvas',
+    foodId: 'uvas',
+    name: 'Uvas',
+    light: 'green',
+    hintIfWrong:
+      '¡Prueba otra luz! Las uvas son frutas frescas naturales llenas de antioxidantes para cada día.',
+    successNote: '¡Luz verde! Las uvas protegen tu corazón con su dulzor natural.',
+  },
+  {
+    id: 'sem-repollo',
+    foodId: 'repollo',
+    name: 'Repollo',
+    light: 'green',
+    hintIfWrong:
+      '¡Casi! El repollo es un vegetal crujiente natural rico en fibra y vitamina C para todos los días.',
+    successNote: '¡Genial! El repollo pertenece a la Luz Verde diaria.',
+  },
+  {
+    id: 'sem-fresa',
+    foodId: 'fresa',
+    name: 'Fresa',
+    light: 'green',
+    hintIfWrong:
+      '¡Prueba otra luz! La fresa es una fruta fresca natural llena de vitamina C para todos los días.',
+    successNote: '¡Luz verde! La fresa cuida tus defensas con dulzor natural.',
+  },
+  {
+    id: 'sem-durazno',
+    foodId: 'durazno',
+    name: 'Durazno',
+    light: 'green',
+    hintIfWrong:
+      '¡Casi! El durazno es una fruta natural jugosa llena de vitaminas A y C para comer cada día.',
+    successNote: '¡Súper! El durazno tiene Luz Verde para disfrutar a diario.',
+  },
+  {
+    id: 'sem-cebolla',
+    foodId: 'cebolla',
+    name: 'Cebolla',
+    light: 'green',
+    hintIfWrong:
+      '¡Prueba otra luz! La cebolla es una hortaliza natural que fortalece tus defensas todos los días.',
+    successNote: '¡Excelente! La cebolla pertenece a la Luz Verde.',
+  },
+  {
+    id: 'sem-melon',
+    foodId: 'melon',
+    name: 'Melón',
+    light: 'green',
+    hintIfWrong:
+      '¡Casi! El melón es una fruta fresca llena de agua natural y vitamina A para todos los días.',
+    successNote: '¡Bravo! El melón tiene Luz Verde para refrescarte todos los días.',
   },
 ];

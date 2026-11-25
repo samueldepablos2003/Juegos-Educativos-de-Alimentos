@@ -57,7 +57,7 @@ export const FOOD_IMAGE_ASSETS: Record<string, FoodImageAssetMeta> = {
     src: '/assets/aistudio/Caraotas_Negras_be4cf929.jpg',
     alt: 'Caraotas negras',
   },
-  repollo: {
+  lechuga: {
     src: '/assets/aistudio/Lechuga_45c48223.jpg',
     alt: 'Lechuga',
   },
@@ -176,6 +176,86 @@ export const FOOD_IMAGE_ASSETS: Record<string, FoodImageAssetMeta> = {
   avena: {
     src: '/assets/aistudio/Avena_62f1a73d.jpg',
     alt: 'Avena',
+  },
+  cotufas: {
+    src: '/assets/aistudio/Cotufas_6ddc1501.jpg',
+    alt: 'Cotufas',
+  },
+  mani: {
+    src: '/assets/aistudio/Man__d3bc5a65.jpg',
+    alt: 'Maní',
+  },
+  uvas: {
+    src: '/assets/aistudio/Uvas_4a85b8aa.jpg',
+    alt: 'Uvas',
+  },
+  pastelito: {
+    src: '/assets/aistudio/Pastelito_3c3ed7fd.jpg',
+    alt: 'Pastelito',
+  },
+  casabe: {
+    src: '/assets/aistudio/Casabe_b6656464.jpg',
+    alt: 'Casabe',
+  },
+  atun: {
+    src: '/assets/aistudio/At_n_en_lata_6f62abf5.jpg',
+    alt: 'Atún en Lata',
+  },
+  perro_caliente: {
+    src: '/assets/aistudio/Perro_Caliente_a0c7c259.jpg',
+    alt: 'Perro caliente',
+  },
+  azucar: {
+    src: '/assets/aistudio/Az_car_2a46702b.jpg',
+    alt: 'Azúcar',
+  },
+  aceite: {
+    src: '/assets/aistudio/Aceite_3ed010c9.jpg',
+    alt: 'Aceite',
+  },
+  repollo: {
+    src: '/assets/aistudio/Repollo_a9b83778.jpg',
+    alt: 'Repollo',
+  },
+  fresa: {
+    src: '/assets/aistudio/Fresa_8f808c83.jpg',
+    alt: 'Fresa',
+  },
+  pimenton: {
+    src: '/assets/aistudio/Piment_n_1a11741e.jpg',
+    alt: 'Pimentón Rojo',
+  },
+  yogurt: {
+    src: '/assets/aistudio/Yogurt_11ae044b.jpg',
+    alt: 'Yogurt',
+  },
+  durazno: {
+    src: '/assets/aistudio/Durazno_af35e5d3.jpg',
+    alt: 'Durazno',
+  },
+  mayonesa: {
+    src: '/assets/aistudio/Mayonesa_96f1e0f0.jpg',
+    alt: 'Mayonesa',
+  },
+  cebolla: {
+    src: '/assets/aistudio/Cebolla_071033b5.jpg',
+    alt: 'Cebolla',
+  },
+  helado: {
+    src: '/assets/aistudio/Helado_14e1d98f.jpg',
+    alt: 'Helado',
+  },
+  jojoto: {
+    src: '/assets/aistudio/Jojoto_8ab8fc29.jpg',
+    alt: 'Jojoto',
+  },
+  naranja: {
+    src: '/assets/aistudio/Naranja_d623c6bb.jpg',
+    alt: 'Naranja',
+  },
+  melon: {
+    src: '/assets/aistudio/Mel_n_79dcfde3.jpg',
+    alt: 'Melón',
   },
 };
 

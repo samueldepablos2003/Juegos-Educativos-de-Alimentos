@@ -423,6 +423,176 @@ export const SUPERPOWER_CARDS: SuperpowerCard[] = [
       correcta: 0,
     },
   },
+  {
+    id: 'sp-uvas',
+    foodId: 'uvas',
+    name: 'Uvas',
+    group: 'shield',
+    groupLabel: 'Escudo Protector',
+    frameColor: '#7E22CE',
+    badgeBg: '#F3E8FF',
+    superpowerTitle: 'Perlas Moradas del Corazón',
+    superpowerDesc:
+      'Su piel morada guarda antioxidantes naturales y agua dulce que cuidan tu corazón y te refrescan.',
+    bodyZone: 'heart',
+    bodyZoneLabel: 'Corazón y Energía',
+    bodyZoneBenefit: 'Cuida tus vasos sanguíneos y aporta energía limpia de fruta fresca.',
+    familyTip:
+      'Lávalas muy bien y sírvelas frescas (partidas a la mitad para los más chiquitos) como merienda dulce sin azúcar añadida.',
+    lightningQuestion:
+      '¿Qué superpoder esconden las uvas moradas en su piel brillante?',
+    lightningAnswer: '¡Antioxidantes que cuidan el corazón!',
+    preguntaRelampago: {
+      enunciado:
+        '¿Qué superpoder esconden las uvas moradas en su piel brillante?',
+      opciones: [
+        'Antioxidantes que cuidan el corazón',
+        'Colorante artificial',
+        'Exceso de sal',
+      ],
+      correcta: 0,
+    },
+  },
+  {
+    id: 'sp-repollo',
+    foodId: 'repollo',
+    name: 'Repollo',
+    group: 'shield',
+    groupLabel: 'Escudo Protector',
+    frameColor: '#65A30D',
+    badgeBg: '#ECFCCB',
+    superpowerTitle: 'Hojas Crujientes de Fibra',
+    superpowerDesc:
+      'Sus hojas crujientes aportan vitamina C, vitamina K y fibra para que tu barriguita y defensas estén al 100%.',
+    bodyZone: 'tummy',
+    bodyZoneLabel: 'Barriguita y Defensas',
+    bodyZoneBenefit: 'Ayuda a la digestión y fortalece tus defensas naturales.',
+    familyTip:
+      'Pícalo bien finito con zanahoria rallada y limón: rinde muchísimo, es económico y le da un toque crujiente al almuerzo.',
+    lightningQuestion:
+      '¿Qué hace que la ensalada de repollo con zanahoria sea tan buena para tu barriguita?',
+    lightningAnswer: '¡Su fibra natural y sus vitaminas!',
+    preguntaRelampago: {
+      enunciado:
+        '¿Qué hace que la ensalada de repollo con zanahoria sea tan buena para tu barriguita?',
+      opciones: [
+        'Su fibra natural y sus vitaminas',
+        'Mucho azúcar añadido',
+        'Salsas comerciales',
+      ],
+      correcta: 0,
+    },
+  },
+  {
+    id: 'sp-fresa',
+    foodId: 'fresa',
+    name: 'Fresa',
+    group: 'shield',
+    groupLabel: 'Escudo Protector',
+    frameColor: '#E11D48',
+    badgeBg: '#FFE4E6',
+    superpowerTitle: 'Corazón Rojo de Vitamina C',
+    superpowerDesc:
+      'Su color rojo brillante está repleto de vitamina C y antioxidantes que fortalecen tus defensas y cuidan tu corazón.',
+    bodyZone: 'heart',
+    bodyZoneLabel: 'Corazón y Defensas',
+    bodyZoneBenefit: 'Protege contra resfriados y mantiene tu corazón fuerte.',
+    familyTip:
+      'Lávalas muy bien y sírvelas frescas con yogurt natural sin azúcar o en la lonchera como merienda deliciosa.',
+    lightningQuestion:
+      '¿Qué vitamina abunda en las fresas rojas para proteger nuestras defensas?',
+    lightningAnswer: '¡La Vitamina C!',
+    preguntaRelampago: {
+      enunciado:
+        '¿Qué vitamina abunda en las fresas rojas para proteger nuestras defensas?',
+      opciones: ['La Vitamina C', 'La sal refinada', 'El aceite frito'],
+      correcta: 0,
+    },
+  },
+  {
+    id: 'sp-durazno',
+    foodId: 'durazno',
+    name: 'Durazno',
+    group: 'shield',
+    groupLabel: 'Escudo Protector',
+    frameColor: '#FB923C',
+    badgeBg: '#FFEDD5',
+    superpowerTitle: 'Piel Suave y Vista Brillante',
+    superpowerDesc:
+      'Trae betacarotenos, fibra y agua dulce natural para cuidar tu vista, tu piel y tu barriguita.',
+    bodyZone: 'eyes',
+    bodyZoneLabel: 'Ojos y Piel',
+    bodyZoneBenefit: 'Ayuda a ver con claridad y mantiene tu piel sana.',
+    familyTip:
+      'Disfrútalo fresco y bien lavado con su piel aterciopelada en lugar de duraznos en almíbar llenos de azúcar.',
+    lightningQuestion:
+      '¿Cómo es más nutritivo comer el durazno: fresco natural o en lata con almíbar azucarado?',
+    lightningAnswer: '¡Fresco y natural con toda su fibra!',
+    preguntaRelampago: {
+      enunciado: '¿Cómo es más nutritivo comer el durazno?',
+      opciones: [
+        'Fresco y natural con toda su fibra',
+        'En almíbar con mucha azúcar',
+        'Convertido en caramelo',
+      ],
+      correcta: 0,
+    },
+  },
+  {
+    id: 'sp-melon',
+    foodId: 'melon',
+    name: 'Melón',
+    group: 'shield',
+    groupLabel: 'Escudo Protector',
+    frameColor: '#F97316',
+    badgeBg: '#FFEDD5',
+    superpowerTitle: 'Ola Refrescante de Vitamina A',
+    superpowerDesc:
+      'Casi 90% del melón es agua natural junto con vitamina A y potasio para hidratarte y cuidar tu vista.',
+    bodyZone: 'eyes',
+    bodyZoneLabel: 'Ojos e Hidratación',
+    bodyZoneBenefit: 'Refresca tu cuerpo y protege tu visión en días soleados.',
+    familyTip:
+      'Córtalo en cubitos fríos para la merienda o el desayuno: calma la sed y da dulzor natural sin azúcar añadida.',
+    lightningQuestion:
+      '¿Qué vitamina del melón anaranjado ayuda a mantener sana nuestra vista?',
+    lightningAnswer: '¡La Vitamina A!',
+    preguntaRelampago: {
+      enunciado:
+        '¿Qué vitamina del melón anaranjado ayuda a mantener sana nuestra vista?',
+      opciones: ['La Vitamina A', 'La sal marina', 'Los colorantes'],
+      correcta: 0,
+    },
+  },
+  {
+    id: 'sp-cebolla',
+    foodId: 'cebolla',
+    name: 'Cebolla',
+    group: 'shield',
+    groupLabel: 'Escudo Protector',
+    frameColor: '#D97706',
+    badgeBg: '#FEF3C7',
+    superpowerTitle: 'Guardiana de las Defensas',
+    superpowerDesc:
+      'Sus capas guardan antioxidantes naturales y fibra prebiótica que defienden tu cuerpo y dan sabor real a las comidas.',
+    bodyZone: 'tummy',
+    bodyZoneLabel: 'Defensas y Barriguita',
+    bodyZoneBenefit: 'Alimenta las bacterias buenas de tu barriguita y refuerza tus defensas.',
+    familyTip:
+      'Úsala en sofritos caseros con tomate y pimentón para dar mucho sabor sin necesidad de cubitos ni exceso de sal.',
+    lightningQuestion:
+      '¿Cómo ayuda la cebolla cuando la usamos en sofritos caseros?',
+    lightningAnswer: '¡Da sabor natural y evita usar exceso de sal o cubitos!',
+    preguntaRelampago: {
+      enunciado: '¿Cómo ayuda la cebolla cuando la usamos en sofritos caseros?',
+      opciones: [
+        'Da sabor natural y evita exceso de sal',
+        'Añade azúcar refinado',
+        'Reemplaza el agua pura',
+      ],
+      correcta: 0,
+    },
+  },
 
   // GRUPO 2: PROTEÍNAS (6)
   {
@@ -604,6 +774,91 @@ export const SUPERPOWER_CARDS: SuperpowerCard[] = [
       enunciado:
         '¿Qué mineral estrella de la leche líquida ayuda a construir huesos y dientes fuertes?',
       opciones: ['El Calcio', 'El Sodio', 'El Colorante'],
+      correcta: 0,
+    },
+  },
+  {
+    id: 'sp-atun',
+    foodId: 'atun',
+    name: 'Atún en Lata',
+    group: 'protein',
+    groupLabel: 'Constructores de Fuerza',
+    frameColor: '#0284C7',
+    badgeBg: '#E0F2FE',
+    superpowerTitle: 'Proteína Marina Inteligente',
+    superpowerDesc:
+      'Está lleno de proteína magra y Omega-3 que ayudan a tus músculos a crecer y a tu mente a recordar todo.',
+    bodyZone: 'brain',
+    bodyZoneLabel: 'Cerebro y Músculos',
+    bodyZoneBenefit: 'Alimenta tu memoria y construye músculos ágiles.',
+    familyTip:
+      'Prefiere atún en agua (o escúrrelo bien) y mézclalo con tomate, cebolla y limón para rellenar arepas o acompañar ensaladas.',
+    lightningQuestion:
+      '¿Cuál es la mejor forma de elegir el atún en lata para hacerlo aún más saludable?',
+    lightningAnswer: '¡Al natural en agua y mezclado con vegetales frescos!',
+    preguntaRelampago: {
+      enunciado:
+        '¿Cuál es la mejor forma de elegir el atún en lata para hacerlo aún más saludable?',
+      opciones: [
+        'Al natural en agua y con vegetales',
+        'Con mucha mayonesa comercial',
+        'Acompañado de refresco',
+      ],
+      correcta: 0,
+    },
+  },
+  {
+    id: 'sp-mani',
+    foodId: 'mani',
+    name: 'Maní',
+    group: 'protein',
+    groupLabel: 'Constructores de Fuerza',
+    frameColor: '#B45309',
+    badgeBg: '#FEF3C7',
+    superpowerTitle: 'Semillas de Súper Concentración',
+    superpowerDesc:
+      'Trae proteína vegetal, vitamina E y grasas saludables que ayudan a tu cerebro a concentrarse mejor.',
+    bodyZone: 'brain',
+    bodyZoneLabel: 'Cerebro y Fuerza',
+    bodyZoneBenefit: 'Aporta energía duradera y grasas buenas en un puñadito.',
+    familyTip:
+      'Elige maní tostado sin sal ni azúcar cubierta y sírvelo en porciones pequeñas junto a una fruta fresca.',
+    lightningQuestion:
+      '¿Cómo es más saludable disfrutar el maní como merienda?',
+    lightningAnswer: '¡Natural o tostado sin exceso de sal ni azúcar!',
+    preguntaRelampago: {
+      enunciado: '¿Cómo es más saludable disfrutar el maní como merienda?',
+      opciones: [
+        'Natural o tostado sin exceso de sal',
+        'Cubierto de caramelo y colorantes',
+        'Frito con mucha sal',
+      ],
+      correcta: 0,
+    },
+  },
+  {
+    id: 'sp-yogurt',
+    foodId: 'yogurt',
+    name: 'Yogurt',
+    group: 'protein',
+    groupLabel: 'Constructores de Fuerza',
+    frameColor: '#38BDF8',
+    badgeBg: '#E0F2FE',
+    superpowerTitle: 'Probióticos y Huesos de Acero',
+    superpowerDesc:
+      'Combina calcio, proteínas y probióticos amigables que fortalecen tus huesos y protegen tu digestión.',
+    bodyZone: 'bones',
+    bodyZoneLabel: 'Huesos y Barriguita',
+    bodyZoneBenefit: 'Fortalece el esqueleto y cuida las defensas de tu estómago.',
+    familyTip:
+      'Prefiere yogurt natural sin azúcar añadida y endúlzalo en casa con fresas, cambur o durazno picadito.',
+    lightningQuestion:
+      '¿Qué amigos invisibles del yogurt natural ayudan a mantener feliz tu barriguita?',
+    lightningAnswer: '¡Los probióticos!',
+    preguntaRelampago: {
+      enunciado:
+        '¿Qué amigos invisibles del yogurt natural ayudan a mantener feliz tu barriguita?',
+      opciones: ['Los probióticos', 'Los colorantes artificiales', 'El exceso de sal'],
       correcta: 0,
     },
   },
@@ -796,6 +1051,86 @@ export const SUPERPOWER_CARDS: SuperpowerCard[] = [
         'Con vegetales frescos y una proteína natural',
         'Solo con refresco y caramelos',
         'Con papas fritas de bolsa',
+      ],
+      correcta: 0,
+    },
+  },
+  {
+    id: 'sp-casabe',
+    foodId: 'casabe',
+    name: 'Casabe',
+    group: 'energy',
+    groupLabel: 'Gasolina y Energía',
+    frameColor: '#B45309',
+    badgeBg: '#FEF3C7',
+    superpowerTitle: 'Crujido Ancestral de Fibra',
+    superpowerDesc:
+      'Hecho 100% de yuca natural sin frituras, te regala fibra y energía sana para toda la jornada.',
+    bodyZone: 'tummy',
+    bodyZoneLabel: 'Energía y Digestión',
+    bodyZoneBenefit: 'Da energía limpia y cuida tu barriguita gracias a su alta fibra.',
+    familyTip:
+      'Úsalo crujiente para acompañar sopas, pescado o pollo desmechado: es un carbohidrato tradicional sin grasas añadidas.',
+    lightningQuestion:
+      '¿De qué raíz venezolana se prepara tradicionalmente el casabe?',
+    lightningAnswer: '¡De la yuca!',
+    preguntaRelampago: {
+      enunciado:
+        '¿De qué raíz venezolana se prepara tradicionalmente el casabe?',
+      opciones: ['De la yuca', 'De la manzana', 'Del azúcar'],
+      correcta: 0,
+    },
+  },
+  {
+    id: 'sp-cotufas',
+    foodId: 'cotufas',
+    name: 'Cotufas',
+    group: 'energy',
+    groupLabel: 'Gasolina y Energía',
+    frameColor: '#DC2626',
+    badgeBg: '#FEE2E2',
+    superpowerTitle: 'Nubes de Maíz Integral',
+    superpowerDesc:
+      'Cuando se preparan en casa con poquito aceite y poca sal, las cotufas son un grano entero con fibra y energía ligera.',
+    bodyZone: 'tummy',
+    bodyZoneLabel: 'Fibra y Energía',
+    bodyZoneBenefit: 'Dan saciedad ligera y energía saludable para jugar.',
+    familyTip:
+      'Prepáralas en olla tapada en casa en lugar de comprar paquetes ultraprocesados con exceso de mantequilla artificial y sal.',
+    lightningQuestion:
+      '¿De qué cereal natural nacen las cotufas?',
+    lightningAnswer: '¡Del maíz natural!',
+    preguntaRelampago: {
+      enunciado: '¿De qué cereal natural nacen las cotufas?',
+      opciones: ['Del maíz natural', 'De caramelos derretidos', 'De embutidos'],
+      correcta: 0,
+    },
+  },
+  {
+    id: 'sp-jojoto',
+    foodId: 'jojoto',
+    name: 'Jojoto',
+    group: 'energy',
+    groupLabel: 'Gasolina y Energía',
+    frameColor: '#EAB308',
+    badgeBg: '#FEF9C3',
+    superpowerTitle: 'Granos Dorados de Energía',
+    superpowerDesc:
+      'Sus granitos amarillos aportan carbohidratos naturales, fibra y antioxidantes que dan energía limpia para todo el día.',
+    bodyZone: 'muscles',
+    bodyZoneLabel: 'Energía y Vista',
+    bodyZoneBenefit: 'Recarga tus músculos y aporta fibra natural del maíz tierno.',
+    familyTip:
+      'Disfrútalo sancochado, asado o en cachapas caseras con queso blanco fresco en lugar de mantequilla en exceso.',
+    lightningQuestion:
+      '¿Qué nutriente energético principal nos regala el jojoto tierno?',
+    lightningAnswer: '¡Carbohidratos naturales y fibra del maíz!',
+    preguntaRelampago: {
+      enunciado: '¿Qué nutriente energético principal nos regala el jojoto tierno?',
+      opciones: [
+        'Carbohidratos naturales y fibra',
+        'Azúcar refinada artificial',
+        'Grasas de frituras',
       ],
       correcta: 0,
     },

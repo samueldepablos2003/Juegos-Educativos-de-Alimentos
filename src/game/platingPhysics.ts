@@ -30,9 +30,12 @@ export interface PlatedTransform {
 }
 
 export const BASE_PLATE_Z_INDEX = 10;
-export const MAX_VISIBLE_PER_SECTOR = 12;
+export const MAX_VISIBLE_PER_SECTOR = 18;
 export const BOWL_CENTER = 50;
 export const SAFE_BOWL_RADIUS = 50;
+export const LEFT_SPLIT_BOWL_Y = 64;
+export const RIGHT_SPLIT_BOWL_Y = 50;
+export const FATS_SAFE_RADIUS = 36;
 export const OUTER_EXPANSION_MARGIN_PX = 24;
 export const DEFAULT_BOWL_DIAMETER_PX = 656;
 export const OUTER_OVERFLOW_RADIUS = 54.5;
@@ -67,6 +70,7 @@ export interface ReorganizeOptions {
 
 const FOOD_VOLUME_TIERS: Record<string, FoodVolumeTier> = {
   // Voluminous / base bed foods (lower z-index, larger scale)
+  lechuga: 'base',
   repollo: 'base',
   brocoli: 'base',
   auyama: 'base',
@@ -81,6 +85,7 @@ const FOOD_VOLUME_TIERS: Record<string, FoodVolumeTier> = {
   arepa: 'base',
   avena: 'base',
   pan: 'base',
+  casabe: 'base',
 
   // Medium-volume foods
   mango: 'medium',
@@ -89,11 +94,18 @@ const FOOD_VOLUME_TIERS: Record<string, FoodVolumeTier> = {
   zanahoria: 'medium',
   pimenton: 'medium',
   berenjena: 'medium',
+  uvas: 'medium',
+  melon: 'medium',
   queso: 'medium',
   leche: 'medium',
+  yogurt: 'medium',
+  atun: 'medium',
   yuca: 'medium',
   platano: 'medium',
   papa: 'medium',
+  pasta: 'medium',
+  cotufas: 'medium',
+  jojoto: 'medium',
 
   // Smaller / round / topping detail foods (higher z-index)
   tomate: 'detail',
@@ -103,9 +115,15 @@ const FOOD_VOLUME_TIERS: Record<string, FoodVolumeTier> = {
   manzana: 'detail',
   parchita: 'detail',
   naranja: 'detail',
+  mandarina: 'detail',
+  fresa: 'detail',
+  durazno: 'detail',
+  cebolla: 'detail',
   huevo: 'detail',
   caraotas: 'detail',
   lentejas: 'detail',
+  mani: 'detail',
+  aceite: 'detail',
 };
 
 const TIER_WEIGHT: Record<FoodVolumeTier, number> = {
@@ -141,8 +159,11 @@ function clamp(val: number, min: number, max: number): number {
 
 /**
  * Clamps normalized bowl coordinates (0..100) inside the target sector.
- * Allows controlled overflow over the outer rim (OUTER_OVERFLOW_RADIUS) while
- * strictly enforcing internal straight dividers between groups.
+ * - vegetables: top-left (x <= 50 - dividerMargin, y <= LEFT_SPLIT_BOWL_Y - dividerMargin)
+ * - fruits: bottom-left (x <= 50 - dividerMargin, y >= LEFT_SPLIT_BOWL_Y + dividerMargin)
+ * - cereals: top-right (x >= 50 + dividerMargin, y <= RIGHT_SPLIT_BOWL_Y - dividerMargin)
+ * - protein: bottom-right (x >= 50 + dividerMargin, y >= RIGHT_SPLIT_BOWL_Y + dividerMargin)
+ * - fats: standalone circular mini-plate centered at (50, 50)
  */
 export function clampToSectorSafeZone(
   sector: PlateFoodSector,
@@ -152,10 +173,27 @@ export function clampToSectorSafeZone(
 ): { bowlX: number; bowlY: number } {
   const outerRadius = options?.outerRadius ?? OUTER_OVERFLOW_RADIUS;
   const dividerMargin = options?.dividerMargin ?? DIVIDER_MARGIN;
-  const maxXFromDivider =
-    BOWL_CENTER + Math.sqrt(Math.max(0, outerRadius * outerRadius - dividerMargin * dividerMargin));
 
-  if (sector === 'shield') {
+  if (sector === 'fats') {
+    const fatsRadius = Math.min(outerRadius, FATS_SAFE_RADIUS);
+    const dx = rawBowlX - BOWL_CENTER;
+    const dy = rawBowlY - BOWL_CENTER;
+    const dist = Math.hypot(dx, dy);
+    if (dist <= fatsRadius || dist === 0) {
+      return { bowlX: rawBowlX, bowlY: rawBowlY };
+    }
+    const factor = fatsRadius / dist;
+    return {
+      bowlX: BOWL_CENTER + dx * factor,
+      bowlY: BOWL_CENTER + dy * factor,
+    };
+  }
+
+  const maxXFromDivider =
+    BOWL_CENTER +
+    Math.sqrt(Math.max(0, outerRadius * outerRadius - dividerMargin * dividerMargin));
+
+  if (sector === 'vegetables') {
     const bowlX = clamp(
       rawBowlX,
       BOWL_CENTER - outerRadius,
@@ -163,23 +201,40 @@ export function clampToSectorSafeZone(
     );
     const dx = bowlX - BOWL_CENTER;
     const maxDy = Math.sqrt(Math.max(0, outerRadius * outerRadius - dx * dx));
-    const bowlY = clamp(rawBowlY, BOWL_CENTER - maxDy, BOWL_CENTER + maxDy);
+    const maxAllowedY = Math.min(BOWL_CENTER + maxDy, LEFT_SPLIT_BOWL_Y - dividerMargin);
+    const minAllowedY = Math.min(BOWL_CENTER - maxDy, maxAllowedY);
+    const bowlY = clamp(rawBowlY, minAllowedY, maxAllowedY);
     return { bowlX, bowlY };
   }
 
-  if (sector === 'protein') {
+  if (sector === 'fruits') {
+    const minFruitY = LEFT_SPLIT_BOWL_Y + dividerMargin;
+    const minFruitDy = minFruitY - BOWL_CENTER;
+    const maxFruitDx = Math.sqrt(
+      Math.max(0, outerRadius * outerRadius - minFruitDy * minFruitDy)
+    );
+    const minBowlX = Math.min(BOWL_CENTER - dividerMargin, BOWL_CENTER - maxFruitDx);
+    const bowlX = clamp(rawBowlX, minBowlX, BOWL_CENTER - dividerMargin);
+    const dx = bowlX - BOWL_CENTER;
+    const maxDy = Math.sqrt(Math.max(0, outerRadius * outerRadius - dx * dx));
+    const maxAllowedY = Math.max(minFruitY, BOWL_CENTER + maxDy);
+    const bowlY = clamp(rawBowlY, minFruitY, maxAllowedY);
+    return { bowlX, bowlY };
+  }
+
+  if (sector === 'cereals') {
     const bowlX = clamp(rawBowlX, BOWL_CENTER + dividerMargin, maxXFromDivider);
     const dx = bowlX - BOWL_CENTER;
     const maxDy = Math.sqrt(Math.max(0, outerRadius * outerRadius - dx * dx));
-    const bowlY = clamp(rawBowlY, BOWL_CENTER - maxDy, BOWL_CENTER - dividerMargin);
+    const bowlY = clamp(rawBowlY, BOWL_CENTER - maxDy, RIGHT_SPLIT_BOWL_Y - dividerMargin);
     return { bowlX, bowlY };
   }
 
-  // energy (bottom-right quadrant)
+  // protein (bottom-right quadrant)
   const bowlX = clamp(rawBowlX, BOWL_CENTER + dividerMargin, maxXFromDivider);
   const dx = bowlX - BOWL_CENTER;
   const maxDy = Math.sqrt(Math.max(0, outerRadius * outerRadius - dx * dx));
-  const bowlY = clamp(rawBowlY, BOWL_CENTER + dividerMargin, BOWL_CENTER + maxDy);
+  const bowlY = clamp(rawBowlY, RIGHT_SPLIT_BOWL_Y + dividerMargin, BOWL_CENTER + maxDy);
   return { bowlX, bowlY };
 }
 
@@ -191,13 +246,25 @@ export function bowlToSectorLocal(
   bowlX: number,
   bowlY: number
 ): { localX: number; localY: number } {
-  if (sector === 'shield') {
-    return { localX: bowlX * 2, localY: bowlY };
+  if (sector === 'fats') {
+    return { localX: bowlX, localY: bowlY };
   }
-  if (sector === 'protein') {
-    return { localX: (bowlX - 50) * 2, localY: bowlY * 2 };
+  if (sector === 'vegetables') {
+    return { localX: bowlX * 2, localY: (bowlY / LEFT_SPLIT_BOWL_Y) * 100 };
   }
-  return { localX: (bowlX - 50) * 2, localY: (bowlY - 50) * 2 };
+  if (sector === 'fruits') {
+    return {
+      localX: bowlX * 2,
+      localY: ((bowlY - LEFT_SPLIT_BOWL_Y) / (100 - LEFT_SPLIT_BOWL_Y)) * 100,
+    };
+  }
+  if (sector === 'cereals') {
+    return { localX: (bowlX - 50) * 2, localY: (bowlY / RIGHT_SPLIT_BOWL_Y) * 100 };
+  }
+  return {
+    localX: (bowlX - 50) * 2,
+    localY: ((bowlY - RIGHT_SPLIT_BOWL_Y) / (100 - RIGHT_SPLIT_BOWL_Y)) * 100,
+  };
 }
 
 /**
@@ -208,13 +275,25 @@ export function sectorLocalToBowl(
   localX: number,
   localY: number
 ): { bowlX: number; bowlY: number } {
-  if (sector === 'shield') {
-    return { bowlX: localX / 2, bowlY: localY };
+  if (sector === 'fats') {
+    return { bowlX: localX, bowlY: localY };
   }
-  if (sector === 'protein') {
-    return { bowlX: 50 + localX / 2, bowlY: localY / 2 };
+  if (sector === 'vegetables') {
+    return { bowlX: localX / 2, bowlY: (localY / 100) * LEFT_SPLIT_BOWL_Y };
   }
-  return { bowlX: 50 + localX / 2, bowlY: 50 + localY / 2 };
+  if (sector === 'fruits') {
+    return {
+      bowlX: localX / 2,
+      bowlY: LEFT_SPLIT_BOWL_Y + (localY / 100) * (100 - LEFT_SPLIT_BOWL_Y),
+    };
+  }
+  if (sector === 'cereals') {
+    return { bowlX: 50 + localX / 2, bowlY: (localY / 100) * RIGHT_SPLIT_BOWL_Y };
+  }
+  return {
+    bowlX: 50 + localX / 2,
+    bowlY: RIGHT_SPLIT_BOWL_Y + (localY / 100) * (100 - RIGHT_SPLIT_BOWL_Y),
+  };
 }
 
 /**
@@ -283,9 +362,11 @@ export function bringTransformToFront(
 ): { updated: Record<PlateFoodSector, PlatedTransform[]>; nextZIndex: number } {
   const maxZ = Math.max(
     BASE_PLATE_Z_INDEX - 1,
-    ...placements.shield.map((p) => p.zIndex),
+    ...placements.vegetables.map((p) => p.zIndex),
+    ...placements.fruits.map((p) => p.zIndex),
+    ...placements.cereals.map((p) => p.zIndex),
     ...placements.protein.map((p) => p.zIndex),
-    ...placements.energy.map((p) => p.zIndex)
+    ...placements.fats.map((p) => p.zIndex)
   );
   const nextZIndex = maxZ + 1;
   return {
@@ -303,21 +384,28 @@ function getOrganicSectorFallbackCenter(
   sector: PlateFoodSector,
   rng: () => number
 ): { bowlX: number; bowlY: number } {
-  const spreadX = (rng() - 0.5) * 26;
-  const spreadY = (rng() - 0.5) * 32;
+  const spreadX = (rng() - 0.5) * 20;
+  const spreadY = (rng() - 0.5) * 20;
 
-  if (sector === 'shield') {
-    return { bowlX: 25 + spreadX * 0.9, bowlY: 50 + spreadY * 1.45 };
+  if (sector === 'vegetables') {
+    return { bowlX: 27 + spreadX * 0.85, bowlY: 36 + spreadY * 0.9 };
   }
-  if (sector === 'protein') {
+  if (sector === 'fruits') {
+    return { bowlX: 31 + spreadX * 0.65, bowlY: 81 + spreadY * 0.45 };
+  }
+  if (sector === 'cereals') {
     return { bowlX: 73 + spreadX * 0.8, bowlY: 27 + spreadY * 0.8 };
   }
-  return { bowlX: 73 + spreadX * 0.8, bowlY: 73 + spreadY * 0.8 };
+  if (sector === 'protein') {
+    return { bowlX: 73 + spreadX * 0.8, bowlY: 73 + spreadY * 0.8 };
+  }
+  // fats circular mini-plate
+  return { bowlX: 47 + spreadX * 0.7, bowlY: 48 + spreadY * 0.7 };
 }
 
 /**
  * Computes natural organic plating coordinates, cumulative z-index, organic angle (-14deg..14deg),
- * and consistent standard large scale without shrinking as more foods are added.
+ * and consistent standard scale without shrinking as more foods are added.
  */
 export function createPlatedTransform(params: {
   instanceId: string;
@@ -345,8 +433,8 @@ export function createPlatedTransform(params: {
     baseBowlX = ((dropContext.clientX - left) / width) * 100;
     baseBowlY = ((dropContext.clientY - top) / height) * 100;
 
-    // Random pixel scatter of +/- 10px to 25px around the cursor/finger drop point
-    const offsetRadiusPx = 10 + rng() * 15;
+    // Random pixel scatter of +/- 8px to 20px around the cursor/finger drop point
+    const offsetRadiusPx = sector === 'fats' ? 4 + rng() * 8 : 10 + rng() * 14;
     const offsetAngle = rng() * Math.PI * 2;
     const dxPct = ((Math.cos(offsetAngle) * offsetRadiusPx) / width) * 100;
     const dyPct = ((Math.sin(offsetAngle) * offsetRadiusPx) / height) * 100;
@@ -365,7 +453,8 @@ export function createPlatedTransform(params: {
   const { localX, localY } = bowlToSectorLocal(sector, bowlX, bowlY);
 
   const rotation = Math.round((rng() * 28 - 14) * 10) / 10;
-  const scale = Math.round((STANDARD_FOOD_SCALE + (rng() - 0.5) * 0.06) * 1000) / 1000;
+  const baseScale = sector === 'fats' ? 1.15 : STANDARD_FOOD_SCALE;
+  const scale = Math.round((baseScale + (rng() - 0.5) * 0.06) * 1000) / 1000;
 
   return {
     instanceId: params.instanceId,
@@ -379,9 +468,6 @@ export function createPlatedTransform(params: {
   };
 }
 
-/**
- * Interleaves array items from both ends inward so base anchors distribute across the full arc.
- */
 function spreadOrderFromEnds<T>(arr: T[]): T[] {
   const result: T[] = [];
   let left = 0;
@@ -410,11 +496,6 @@ function polarToBowl(r: number, theta: number): { bowlX: number; bowlY: number }
   };
 }
 
-/**
- * Generates abundant, gap-free layered polar anchor points covering the full width and height
- * of each sector (50% semicircle for shield, 25% quadrants for protein/energy), including
- * perimeter anchors hugging the outer plate rim and central focal pockets for foreground layers.
- */
 function generateSectorCollageAnchors(
   sector: PlateFoodSector,
   count: number,
@@ -422,192 +503,126 @@ function generateSectorCollageAnchors(
 ): Array<{ bowlX: number; bowlY: number; layerBand: 'outer' | 'mid' | 'inner' }> {
   if (count <= 0) return [];
 
-  // Perimeter anchors sit close to the outer bowl edge so large foods cover the quadrant edge-to-edge
+  if (sector === 'fats') {
+    if (count === 1) {
+      return [{ bowlX: 48, bowlY: 49, layerBand: 'inner' }];
+    }
+    return Array.from({ length: count }, (_, i) => {
+      const theta = (i / count) * Math.PI * 2;
+      const r = i % 2 === 0 ? 18 : 11;
+      return {
+        bowlX: 48 + r * Math.cos(theta),
+        bowlY: 49 + r * Math.sin(theta),
+        layerBand: i === count - 1 ? ('inner' as const) : ('outer' as const),
+      };
+    });
+  }
+
   const rimRadius = Math.min(46.5, outerRadiusLimit - 4.2);
 
-  if (sector === 'shield') {
-    // Left 50% semicircle: theta in [0.5 * PI (bottom), 1.5 * PI (top)], center = PI (far left)
-    if (count === 1) {
-      return [{ ...polarToBowl(24, Math.PI), layerBand: 'inner' }];
-    }
-    if (count === 2) {
-      return [
-        { ...polarToBowl(28, 1.24 * Math.PI), layerBand: 'outer' },
-        { ...polarToBowl(29, 0.76 * Math.PI), layerBand: 'inner' },
-      ];
-    }
-    if (count === 3) {
-      return [
-        { ...polarToBowl(38, 1.32 * Math.PI), layerBand: 'outer' },
-        { ...polarToBowl(38, 0.68 * Math.PI), layerBand: 'outer' },
-        { ...polarToBowl(23, Math.PI), layerBand: 'inner' },
-      ];
-    }
+  // Angular spans in standard screen polar coords (0 = right, +PI/2 = bottom, PI = left, 1.5*PI = top)
+  let startAngle: number;
+  let endAngle: number;
+  let singleRadius = 29;
 
-    if (count <= 6) {
-      const outerCount = Math.ceil(count * 0.55);
-      const innerCount = count - outerCount;
-      const outerAngles = spreadOrderFromEnds(
-        linspaceAngles(0.6 * Math.PI, 1.4 * Math.PI, outerCount)
-      );
-      const innerAngles = spreadOrderFromEnds(
-        linspaceAngles(0.74 * Math.PI, 1.26 * Math.PI, innerCount)
-      );
-
-      return [
-        ...outerAngles.map((theta, idx) => ({
-          ...polarToBowl(idx % 2 === 0 ? rimRadius - 2 : rimRadius - 5.5, theta),
-          layerBand: 'outer' as const,
-        })),
-        ...innerAngles.map((theta, idx) => ({
-          ...polarToBowl(idx % 2 === 0 ? 19.5 : 24, theta),
-          layerBand: 'inner' as const,
-        })),
-      ];
-    }
-
-    // 7 to 12+ items: lush 3-band collage bed (outer rim bed -> mid overlapping ring -> central hero pocket)
-    const outerCount = Math.max(4, Math.round(count * 0.44));
-    const midCount = Math.max(2, Math.round((count - outerCount) * 0.58));
-    const innerCount = Math.max(1, count - outerCount - midCount);
-
-    const outerAngles = spreadOrderFromEnds(
-      linspaceAngles(0.57 * Math.PI, 1.43 * Math.PI, outerCount)
-    );
-    const midAngles = spreadOrderFromEnds(
-      linspaceAngles(0.65 * Math.PI, 1.35 * Math.PI, midCount)
-    );
-    const innerAngles = spreadOrderFromEnds(
-      linspaceAngles(0.75 * Math.PI, 1.25 * Math.PI, innerCount)
-    );
-
-    return [
-      ...outerAngles.map((theta, idx) => ({
-        ...polarToBowl(idx % 2 === 0 ? rimRadius - 1.2 : rimRadius - 4.8, theta),
-        layerBand: 'outer' as const,
-      })),
-      ...midAngles.map((theta, idx) => ({
-        ...polarToBowl(idx % 2 === 0 ? 29.5 : 33.5, theta),
-        layerBand: 'mid' as const,
-      })),
-      ...innerAngles.map((theta, idx) => ({
-        ...polarToBowl(idx % 2 === 0 ? 16.5 : 21, theta),
-        layerBand: 'inner' as const,
-      })),
-    ];
+  if (sector === 'vegetables') {
+    // Top-left ~34%: from ~0.95*PI (just above left split) to ~1.43*PI (top)
+    startAngle = 0.96 * Math.PI;
+    endAngle = 1.43 * Math.PI;
+    singleRadius = 28;
+  } else if (sector === 'fruits') {
+    // Bottom-left ~16%: from ~0.58*PI (bottom) to ~0.82*PI (below left split)
+    startAngle = 0.58 * Math.PI;
+    endAngle = 0.82 * Math.PI;
+    singleRadius = 35;
+  } else if (sector === 'cereals') {
+    // Top-right 25%: from -0.43*PI to -0.07*PI
+    startAngle = -0.43 * Math.PI;
+    endAngle = -0.07 * Math.PI;
+  } else {
+    // Bottom-right 25% (protein): from +0.07*PI to +0.43*PI
+    startAngle = 0.07 * Math.PI;
+    endAngle = 0.43 * Math.PI;
   }
 
-  // 25% quadrants: protein (top-right, center = -0.25*PI) & energy (bottom-right, center = +0.25*PI)
-  const centerAngle = sector === 'protein' ? -0.25 * Math.PI : 0.25 * Math.PI;
-  const outerHalfSpan = 0.178 * Math.PI;
+  const centerAngle = (startAngle + endAngle) / 2;
 
   if (count === 1) {
-    return [{ ...polarToBowl(29, centerAngle), layerBand: 'inner' }];
+    return [{ ...polarToBowl(singleRadius, centerAngle), layerBand: 'inner' }];
   }
   if (count === 2) {
+    const quarterSpan = (endAngle - startAngle) * 0.28;
     return [
-      { ...polarToBowl(34, centerAngle - 0.115 * Math.PI), layerBand: 'outer' },
-      { ...polarToBowl(30, centerAngle + 0.115 * Math.PI), layerBand: 'inner' },
+      { ...polarToBowl(34, centerAngle - quarterSpan), layerBand: 'outer' },
+      { ...polarToBowl(30, centerAngle + quarterSpan), layerBand: 'inner' },
     ];
   }
   if (count === 3) {
+    const thirdSpan = (endAngle - startAngle) * 0.36;
     return [
-      { ...polarToBowl(rimRadius - 3.5, centerAngle - 0.145 * Math.PI), layerBand: 'outer' },
-      { ...polarToBowl(rimRadius - 3.5, centerAngle + 0.145 * Math.PI), layerBand: 'outer' },
-      { ...polarToBowl(22.5, centerAngle), layerBand: 'inner' },
+      { ...polarToBowl(rimRadius - 3.5, centerAngle - thirdSpan), layerBand: 'outer' },
+      { ...polarToBowl(rimRadius - 3.5, centerAngle + thirdSpan), layerBand: 'outer' },
+      { ...polarToBowl(sector === 'fruits' ? 32 : 24, centerAngle), layerBand: 'inner' },
     ];
   }
 
-  if (count <= 6) {
-    const outerCount = Math.ceil(count * 0.52);
-    const innerCount = count - outerCount;
-    const outerAngles = spreadOrderFromEnds(
-      linspaceAngles(centerAngle - outerHalfSpan, centerAngle + outerHalfSpan, outerCount)
-    );
-    const innerAngles = spreadOrderFromEnds(
-      linspaceAngles(centerAngle - 0.135 * Math.PI, centerAngle + 0.135 * Math.PI, innerCount)
-    );
-
-    return [
-      ...outerAngles.map((theta, idx) => ({
-        ...polarToBowl(idx % 2 === 0 ? rimRadius - 1.8 : rimRadius - 5, theta),
-        layerBand: 'outer' as const,
-      })),
-      ...innerAngles.map((theta, idx) => ({
-        ...polarToBowl(idx % 2 === 0 ? 20.5 : 25.5, theta),
-        layerBand: 'inner' as const,
-      })),
-    ];
-  }
-
-  // 7 to 12+ items in a 25% quadrant: abundant 3-layer bodegon filling rim, mid-arc & inner corner
-  const outerCount = Math.max(3, Math.round(count * 0.44));
-  const midCount = Math.max(2, Math.round((count - outerCount) * 0.58));
-  const innerCount = Math.max(1, count - outerCount - midCount);
-
-  const outerAngles = spreadOrderFromEnds(
-    linspaceAngles(centerAngle - outerHalfSpan, centerAngle + outerHalfSpan, outerCount)
-  );
-  const midAngles = spreadOrderFromEnds(
-    linspaceAngles(centerAngle - 0.15 * Math.PI, centerAngle + 0.15 * Math.PI, midCount)
-  );
+  const outerCount = Math.ceil(count * 0.52);
+  const innerCount = count - outerCount;
+  const outerAngles = spreadOrderFromEnds(linspaceAngles(startAngle, endAngle, outerCount));
   const innerAngles = spreadOrderFromEnds(
-    linspaceAngles(centerAngle - 0.11 * Math.PI, centerAngle + 0.11 * Math.PI, innerCount)
+    linspaceAngles(
+      centerAngle - (endAngle - startAngle) * 0.34,
+      centerAngle + (endAngle - startAngle) * 0.34,
+      innerCount
+    )
   );
 
   return [
     ...outerAngles.map((theta, idx) => ({
-      ...polarToBowl(idx % 2 === 0 ? rimRadius - 1.2 : rimRadius - 4.2, theta),
+      ...polarToBowl(idx % 2 === 0 ? rimRadius - 1.8 : rimRadius - 5, theta),
       layerBand: 'outer' as const,
     })),
-    ...midAngles.map((theta, idx) => ({
-      ...polarToBowl(idx % 2 === 0 ? 31.5 : 34.5, theta),
-      layerBand: 'mid' as const,
-    })),
     ...innerAngles.map((theta, idx) => ({
-      ...polarToBowl(idx % 2 === 0 ? 19.5 : 23, theta),
+      ...polarToBowl(
+        sector === 'fruits' ? (idx % 2 === 0 ? 31 : 34) : idx % 2 === 0 ? 21 : 26,
+        theta
+      ),
       layerBand: 'inner' as const,
     })),
   ];
 }
 
-/**
- * Protected protagonist scale curve:
- * Keeps every food large and prominent regardless of quantity (3..12+ items),
- * favoring lush harmonious collage overlap over excessive shrinking.
- */
 function computeAdaptiveScaleForCount(
   count: number,
   tier: FoodVolumeTier,
-  rng: () => number
+  rng: () => number,
+  sector: PlateFoodSector
 ): number {
   const variation = (rng() - 0.5) * 0.1;
+  const sectorScaleMult = sector === 'fats' ? 0.8 : sector === 'fruits' ? 0.92 : 1;
 
   if (count <= 2) {
     const countBase = count === 1 ? 1.54 : 1.44;
     const tierBoost = tier === 'base' ? 0.08 : tier === 'medium' ? 0.02 : -0.04;
-    return Math.round(clamp(countBase + tierBoost + variation, 1.34, 1.66) * 1000) / 1000;
+    return (
+      Math.round(clamp((countBase + tierBoost + variation) * sectorScaleMult, 0.95, 1.66) * 1000) /
+      1000
+    );
   }
 
-  // Protected minimum protagonist floor across 3..12+ items (never shrinks into tiny icons)
   const gentleDensity = clamp((count - 3) / 9, 0, 1);
   const tierBase =
     tier === 'base'
-      ? 1.4 - gentleDensity * 0.08 // stays 1.32..1.40
+      ? 1.4 - gentleDensity * 0.08
       : tier === 'medium'
-        ? 1.31 - gentleDensity * 0.07 // stays 1.24..1.31
-        : 1.24 - gentleDensity * 0.06; // stays 1.18..1.24
+        ? 1.31 - gentleDensity * 0.07
+        : 1.24 - gentleDensity * 0.06;
 
-  return Math.round(clamp(tierBase + variation, 1.16, 1.48) * 1000) / 1000;
+  return (
+    Math.round(clamp((tierBase + variation) * sectorScaleMult, 0.9, 1.48) * 1000) / 1000
+  );
 }
 
-/**
- * Reorganizes a single plate sector into an abundant, structured collage / bodegón:
- * - Protected protagonist scale (never shrinks excessively even with 12 foods)
- * - Full-quadrant polar anchoring reaching the outer rim margin and close to internal dividers
- * - Volume-based z-index layering (bases anchored at bottom layers, details overlapping cleanly on top)
- * - Organic alternating rotations (-14deg..+14deg) with controlled jitter
- */
 export function reorganizarSectorCoherente(
   items: PlatedTransform[],
   sector: PlateFoodSector,
@@ -625,7 +640,6 @@ export function reorganizarSectorCoherente(
   const outerRadiusLimit = clamp(SAFE_BOWL_RADIUS + expansionPct, 52.5, 55);
   const jitterPct = (9 / bowlDiameterPx) * 100;
 
-  // Base & voluminous foods go on lower z-index layers; medium & detail foods layer organically on top
   const sortedMeta = items
     .map((item, idx) => ({
       idx,
@@ -639,18 +653,19 @@ export function reorganizarSectorCoherente(
 
   sortedMeta.forEach((meta, rank) => {
     const anchor = anchors[rank];
-    const scale = computeAdaptiveScaleForCount(items.length, meta.tier, rng);
+    const scale = computeAdaptiveScaleForCount(items.length, meta.tier, rng, sector);
 
-    // Subtle organic alternating tilt (-14deg..+14deg) so neighboring items compose naturally
     const sign = rank % 2 === 0 ? 1 : -1;
     const rotation = Math.round(sign * (3 + rng() * 11) * 10) / 10;
 
-    // Controlled organic jitter around the quadrant anchor
     const rawBowlX = anchor.bowlX + (rng() * 2 - 1) * jitterPct;
     const rawBowlY = anchor.bowlY + (rng() * 2 - 1) * jitterPct;
 
-    // Keep inner divider clearance lean (7.5..10.2) so quadrants fill edge-to-edge without crossing groups
-    const adaptiveDividerMargin = clamp(DIVIDER_MARGIN + (scale - 1.15) * 3.5, DIVIDER_MARGIN, 10.2);
+    const adaptiveDividerMargin = clamp(
+      DIVIDER_MARGIN + (scale - 1.15) * 3.5,
+      DIVIDER_MARGIN,
+      10.2
+    );
 
     const { bowlX, bowlY } = clampToSectorSafeZone(sector, rawBowlX, rawBowlY, {
       outerRadius: outerRadiusLimit,
@@ -671,24 +686,19 @@ export function reorganizarSectorCoherente(
   return nextItems;
 }
 
-/**
- * Analyzes all added foods across the three plate sectors and reorganizes them
- * into a harmonic, abundant organic collage with volume-layered depth.
- */
 export function reorganizarPlatoCoherente(
   placements: Record<PlateFoodSector, PlatedTransform[]>,
   options?: ReorganizeOptions
 ): Record<PlateFoodSector, PlatedTransform[]> {
   return {
-    shield: reorganizarSectorCoherente(placements.shield, 'shield', options),
+    vegetables: reorganizarSectorCoherente(placements.vegetables, 'vegetables', options),
+    fruits: reorganizarSectorCoherente(placements.fruits, 'fruits', options),
+    cereals: reorganizarSectorCoherente(placements.cereals, 'cereals', options),
     protein: reorganizarSectorCoherente(placements.protein, 'protein', options),
-    energy: reorganizarSectorCoherente(placements.energy, 'energy', options),
+    fats: reorganizarSectorCoherente(placements.fats, 'fats', options),
   };
 }
 
-/**
- * Computes gentle layered depth cues so overlapping foods read sharply without shrinking base layers.
- */
 export function getStackDepthStyle(
   indexInSector: number,
   totalInSector: number

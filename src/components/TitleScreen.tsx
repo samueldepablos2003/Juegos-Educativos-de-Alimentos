@@ -1,5 +1,4 @@
 import React from 'react';
-import { Maximize2, Minimize2 } from 'lucide-react';
 import {
   LightningQuizIcon,
   NutriplatoIcon,
@@ -10,12 +9,10 @@ import { SoundToggleButton } from './SoundToggleButton';
 import { playUiClickSound } from '../utils/soundSystem';
 
 interface TitleScreenProps {
-  isFullscreen: boolean;
   onStartGame: () => void;
   onStartSuperpower: () => void;
   onStartSemaforo: () => void;
   onStartLightning: () => void;
-  onToggleFullscreen: () => void;
   onOpenVolunteer?: () => void;
 }
 
@@ -59,12 +56,10 @@ const APP_TILES = [
 ];
 
 export const TitleScreen: React.FC<TitleScreenProps> = ({
-  isFullscreen,
   onStartGame,
   onStartSuperpower,
   onStartSemaforo,
   onStartLightning,
-  onToggleFullscreen,
 }) => {
   const handlers = {
     nutriplato: onStartGame,
@@ -75,7 +70,7 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
 
   return (
     <main className="relative w-screen h-screen overflow-hidden bg-[#8bfffe] flex flex-col justify-between px-6 py-5 sm:px-10 sm:py-6 xl:px-14 xl:py-8">
-      {/* Clean Minimal Top Header: Title Left + Icon-Only Fullscreen Button Right */}
+      {/* Clean Minimal Top Header: Title Left + Sound Control Right */}
       <header className="relative z-10 w-full flex items-center justify-between gap-4 shrink-0">
         <h1 className="font-display title-nutriplato-brand text-3xl sm:text-4xl xl:text-[42px] font-bold tracking-tight leading-none py-0.5">
           Biblioteca de Juegos
@@ -83,33 +78,6 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
 
         <div className="flex items-center gap-2.5 shrink-0">
           <SoundToggleButton size="lg" />
-
-          <button
-            type="button"
-            onClick={onToggleFullscreen}
-            aria-pressed={isFullscreen}
-            aria-label={
-              isFullscreen
-                ? 'Salir de pantalla completa'
-                : 'Pantalla completa para TV'
-            }
-            title={
-              isFullscreen
-                ? 'Salir de pantalla completa'
-                : 'Pantalla Completa (TV)'
-            }
-            className={`p-3 rounded-2xl border-2 border-[#1E1B2E] shadow-[0_4px_0_#1E1B2E] active:translate-y-[3px] flex items-center justify-center transition-[transform,background-color] duration-150 ease-[cubic-bezier(0.22,1,0.36,1)] cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#8137ea] ${
-              isFullscreen
-                ? 'bg-[#fee330] hover:bg-[#f5d81d] text-[#1E1B2E]'
-                : 'bg-[#8137ea] hover:bg-[#7028d9] text-[#ffffff]'
-            }`}
-          >
-            {isFullscreen ? (
-              <Minimize2 className="w-5 h-5 sm:w-6 sm:h-6 pointer-events-none" aria-hidden="true" />
-            ) : (
-              <Maximize2 className="w-5 h-5 sm:w-6 sm:h-6 pointer-events-none" aria-hidden="true" />
-            )}
-          </button>
         </div>
       </header>
 

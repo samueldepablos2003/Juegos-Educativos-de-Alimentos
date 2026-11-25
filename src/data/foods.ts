@@ -3,10 +3,17 @@ export type FoodCategory =
   | 'fruit'
   | 'protein'
   | 'carb'
+  | 'fat'
   | 'water'
   | 'distractor';
 
-export type SectorId = 'shield' | 'protein' | 'energy' | 'hydration';
+export type SectorId =
+  | 'vegetables'
+  | 'fruits'
+  | 'cereals'
+  | 'protein'
+  | 'fats'
+  | 'hydration';
 
 export type RainbowColor = 'orange' | 'red' | 'green' | 'purple' | 'yellow' | 'pink';
 
@@ -14,9 +21,11 @@ export type GameMode = 'breakfast' | 'lunch' | 'free';
 
 export type FilterTab =
   | 'all'
-  | 'shield'
+  | 'vegetables'
+  | 'fruits'
+  | 'cereals'
   | 'protein'
-  | 'energy'
+  | 'fats'
   | 'drinks'
   | 'processed';
 
@@ -34,11 +43,11 @@ export interface FoodItem {
 }
 
 export interface PlateState {
-  shield: FoodItem[];
-  protein: FoodItem | null;
-  extraProteins?: FoodItem[];
-  energy: FoodItem | null;
-  extraEnergies?: FoodItem[];
+  vegetables: FoodItem[];
+  fruits: FoodItem[];
+  cereals: FoodItem[];
+  protein: FoodItem[];
+  fats: FoodItem[];
   hydration: FoodItem | null;
 }
 
@@ -83,7 +92,7 @@ export const MODE_CONFIG: Record<
   free: {
     id: 'free',
     title: 'Reto Libre',
-    subtitle: 'Los 46 alimentos para crear combinaciones arcoíris',
+    subtitle: 'Los 64 alimentos para crear combinaciones arcoíris',
     greeting:
       '¡Reto Libre activado! Explora todo el mercado venezolano y busca el Plato Arcoíris.',
     colorHex: '#2563EB',
@@ -97,7 +106,7 @@ export const FOODS: FoodItem[] = [
     id: 'auyama',
     name: 'Auyama',
     category: 'vegetable',
-    targetSector: 'shield',
+    targetSector: 'vegetables',
     rainbowColor: 'orange',
     rainbowColorLabel: 'Naranja',
     modes: ['lunch', 'free'],
@@ -109,7 +118,7 @@ export const FOODS: FoodItem[] = [
     id: 'zanahoria',
     name: 'Zanahoria',
     category: 'vegetable',
-    targetSector: 'shield',
+    targetSector: 'vegetables',
     rainbowColor: 'orange',
     rainbowColorLabel: 'Naranja',
     modes: ['breakfast', 'lunch', 'free'],
@@ -121,7 +130,7 @@ export const FOODS: FoodItem[] = [
     id: 'tomate',
     name: 'Tomate',
     category: 'vegetable',
-    targetSector: 'shield',
+    targetSector: 'vegetables',
     rainbowColor: 'red',
     rainbowColorLabel: 'Rojo',
     modes: ['breakfast', 'lunch', 'free'],
@@ -133,7 +142,7 @@ export const FOODS: FoodItem[] = [
     id: 'pepino',
     name: 'Pepino',
     category: 'vegetable',
-    targetSector: 'shield',
+    targetSector: 'vegetables',
     rainbowColor: 'green',
     rainbowColorLabel: 'Verde',
     modes: ['breakfast', 'lunch', 'free'],
@@ -142,10 +151,10 @@ export const FOODS: FoodItem[] = [
     accentHex: '#22C55E',
   },
   {
-    id: 'repollo',
+    id: 'lechuga',
     name: 'Lechuga',
     category: 'vegetable',
-    targetSector: 'shield',
+    targetSector: 'vegetables',
     rainbowColor: 'green',
     rainbowColorLabel: 'Verde',
     modes: ['lunch', 'free'],
@@ -154,10 +163,22 @@ export const FOODS: FoodItem[] = [
     accentHex: '#16A34A',
   },
   {
+    id: 'repollo',
+    name: 'Repollo',
+    category: 'vegetable',
+    targetSector: 'vegetables',
+    rainbowColor: 'green',
+    rainbowColorLabel: 'Verde',
+    modes: ['lunch', 'free'],
+    speechText: '¡Crujiente y lleno de fibra y vitamina C para tus defensas!',
+    superpower: 'Fibra y defensas crujientes',
+    accentHex: '#65A30D',
+  },
+  {
     id: 'brocoli',
     name: 'Brócoli',
     category: 'vegetable',
-    targetSector: 'shield',
+    targetSector: 'vegetables',
     rainbowColor: 'green',
     rainbowColorLabel: 'Verde',
     modes: ['lunch', 'free'],
@@ -169,7 +190,7 @@ export const FOODS: FoodItem[] = [
     id: 'pimenton',
     name: 'Pimentón Rojo',
     category: 'vegetable',
-    targetSector: 'shield',
+    targetSector: 'vegetables',
     rainbowColor: 'red',
     rainbowColorLabel: 'Rojo',
     modes: ['breakfast', 'lunch', 'free'],
@@ -181,7 +202,7 @@ export const FOODS: FoodItem[] = [
     id: 'remolacha',
     name: 'Remolacha',
     category: 'vegetable',
-    targetSector: 'shield',
+    targetSector: 'vegetables',
     rainbowColor: 'purple',
     rainbowColorLabel: 'Morado',
     modes: ['lunch', 'free'],
@@ -193,7 +214,7 @@ export const FOODS: FoodItem[] = [
     id: 'berenjena',
     name: 'Berenjena',
     category: 'vegetable',
-    targetSector: 'shield',
+    targetSector: 'vegetables',
     rainbowColor: 'purple',
     rainbowColorLabel: 'Morado',
     modes: ['lunch', 'free'],
@@ -201,13 +222,25 @@ export const FOODS: FoodItem[] = [
     superpower: 'Escudo morado antioxidante',
     accentHex: '#7E22CE',
   },
+  {
+    id: 'cebolla',
+    name: 'Cebolla',
+    category: 'vegetable',
+    targetSector: 'vegetables',
+    rainbowColor: 'yellow',
+    rainbowColorLabel: 'Amarillo',
+    modes: ['breakfast', 'lunch', 'free'],
+    speechText: '¡Da sabor natural a las comidas y fortalece tus defensas!',
+    superpower: 'Defensas y sabor natural',
+    accentHex: '#D97706',
+  },
 
   // FRUTAS (7 opciones - Escudo Protector)
   {
     id: 'cambur',
     name: 'Cambur',
     category: 'fruit',
-    targetSector: 'shield',
+    targetSector: 'fruits',
     rainbowColor: 'yellow',
     rainbowColorLabel: 'Amarillo',
     modes: ['breakfast', 'free'],
@@ -219,7 +252,7 @@ export const FOODS: FoodItem[] = [
     id: 'guayaba',
     name: 'Guayaba',
     category: 'fruit',
-    targetSector: 'shield',
+    targetSector: 'fruits',
     rainbowColor: 'pink',
     rainbowColorLabel: 'Rosado',
     modes: ['breakfast', 'lunch', 'free'],
@@ -231,7 +264,7 @@ export const FOODS: FoodItem[] = [
     id: 'mango',
     name: 'Mango',
     category: 'fruit',
-    targetSector: 'shield',
+    targetSector: 'fruits',
     rainbowColor: 'orange',
     rainbowColorLabel: 'Naranja',
     modes: ['breakfast', 'lunch', 'free'],
@@ -243,7 +276,7 @@ export const FOODS: FoodItem[] = [
     id: 'lechosa',
     name: 'Lechosa',
     category: 'fruit',
-    targetSector: 'shield',
+    targetSector: 'fruits',
     rainbowColor: 'orange',
     rainbowColorLabel: 'Naranja',
     modes: ['breakfast', 'free'],
@@ -255,7 +288,7 @@ export const FOODS: FoodItem[] = [
     id: 'patilla',
     name: 'Patilla / Sandía',
     category: 'fruit',
-    targetSector: 'shield',
+    targetSector: 'fruits',
     rainbowColor: 'red',
     rainbowColorLabel: 'Rojo',
     modes: ['lunch', 'free'],
@@ -267,7 +300,7 @@ export const FOODS: FoodItem[] = [
     id: 'naranja',
     name: 'Naranja',
     category: 'fruit',
-    targetSector: 'shield',
+    targetSector: 'fruits',
     rainbowColor: 'orange',
     rainbowColorLabel: 'Naranja',
     modes: ['breakfast', 'free'],
@@ -279,7 +312,7 @@ export const FOODS: FoodItem[] = [
     id: 'pina',
     name: 'Piña',
     category: 'fruit',
-    targetSector: 'shield',
+    targetSector: 'fruits',
     rainbowColor: 'yellow',
     rainbowColorLabel: 'Amarillo',
     modes: ['lunch', 'free'],
@@ -291,7 +324,7 @@ export const FOODS: FoodItem[] = [
     id: 'guanabana',
     name: 'Guanábana',
     category: 'fruit',
-    targetSector: 'shield',
+    targetSector: 'fruits',
     rainbowColor: 'green',
     rainbowColorLabel: 'Verde',
     modes: ['breakfast', 'lunch', 'free'],
@@ -303,7 +336,7 @@ export const FOODS: FoodItem[] = [
     id: 'manzana',
     name: 'Manzana',
     category: 'fruit',
-    targetSector: 'shield',
+    targetSector: 'fruits',
     rainbowColor: 'red',
     rainbowColorLabel: 'Rojo',
     modes: ['breakfast', 'lunch', 'free'],
@@ -314,8 +347,8 @@ export const FOODS: FoodItem[] = [
   {
     id: 'aguacate',
     name: 'Aguacate',
-    category: 'fruit',
-    targetSector: 'shield',
+    category: 'fat',
+    targetSector: 'fats',
     rainbowColor: 'green',
     rainbowColorLabel: 'Verde',
     modes: ['breakfast', 'lunch', 'free'],
@@ -327,7 +360,7 @@ export const FOODS: FoodItem[] = [
     id: 'parchita',
     name: 'Parchita',
     category: 'fruit',
-    targetSector: 'shield',
+    targetSector: 'fruits',
     rainbowColor: 'yellow',
     rainbowColorLabel: 'Amarillo',
     modes: ['breakfast', 'lunch', 'free'],
@@ -339,12 +372,60 @@ export const FOODS: FoodItem[] = [
     id: 'mandarina',
     name: 'Mandarina',
     category: 'fruit',
-    targetSector: 'shield',
+    targetSector: 'fruits',
     rainbowColor: 'orange',
     rainbowColorLabel: 'Naranja',
     modes: ['breakfast', 'lunch', 'free'],
     speechText: '¡Dulce, fácil de pelar y llena de vitamina C para proteger tus defensas!',
     superpower: 'Vitamina C en gajos',
+    accentHex: '#F97316',
+  },
+  {
+    id: 'uvas',
+    name: 'Uvas',
+    category: 'fruit',
+    targetSector: 'fruits',
+    rainbowColor: 'purple',
+    rainbowColorLabel: 'Morado',
+    modes: ['breakfast', 'lunch', 'free'],
+    speechText: '¡Dulces y jugosas, llenas de antioxidantes morados para tu corazón!',
+    superpower: 'Antioxidantes para el corazón',
+    accentHex: '#7E22CE',
+  },
+  {
+    id: 'fresa',
+    name: 'Fresa',
+    category: 'fruit',
+    targetSector: 'fruits',
+    rainbowColor: 'red',
+    rainbowColorLabel: 'Rojo',
+    modes: ['breakfast', 'lunch', 'free'],
+    speechText: '¡Dulce, fresca y llena de vitamina C para cuidar tus defensas y sonrisa!',
+    superpower: 'Vitamina C y corazón sano',
+    accentHex: '#E11D48',
+  },
+  {
+    id: 'durazno',
+    name: 'Durazno',
+    category: 'fruit',
+    targetSector: 'fruits',
+    rainbowColor: 'orange',
+    rainbowColorLabel: 'Naranja',
+    modes: ['breakfast', 'lunch', 'free'],
+    speechText: '¡Suave, jugoso y cargado de vitaminas A y C para tu piel y vista!',
+    superpower: 'Piel sana y vista brillante',
+    accentHex: '#FB923C',
+  },
+  {
+    id: 'melon',
+    name: 'Melón',
+    category: 'fruit',
+    targetSector: 'fruits',
+    rainbowColor: 'orange',
+    rainbowColorLabel: 'Naranja',
+    modes: ['breakfast', 'lunch', 'free'],
+    speechText: '¡Súper refrescante, rico en agua natural y vitamina A para hidratarte!',
+    superpower: 'Hidratación y vitamina A',
     accentHex: '#F97316',
   },
 
@@ -429,13 +510,43 @@ export const FOODS: FoodItem[] = [
     superpower: 'Calcio y huesos fuertes',
     accentHex: '#0EA5E9',
   },
+  {
+    id: 'atun',
+    name: 'Atún en Lata',
+    category: 'protein',
+    targetSector: 'protein',
+    modes: ['breakfast', 'lunch', 'free'],
+    speechText: '¡Trae proteína y Omega-3 para músculos fuertes y memoria brillante!',
+    superpower: 'Proteína y Omega-3',
+    accentHex: '#0284C7',
+  },
+  {
+    id: 'mani',
+    name: 'Maní',
+    category: 'fat',
+    targetSector: 'fats',
+    modes: ['breakfast', 'lunch', 'free'],
+    speechText: '¡Aporta grasas saludables y energía natural para tu concentración y corazón!',
+    superpower: 'Grasas buenas y energía',
+    accentHex: '#B45309',
+  },
+  {
+    id: 'yogurt',
+    name: 'Yogurt',
+    category: 'protein',
+    targetSector: 'protein',
+    modes: ['breakfast', 'lunch', 'free'],
+    speechText: '¡Tiene calcio para tus huesos y probióticos que cuidan tu barriguita!',
+    superpower: 'Calcio y barriguita feliz',
+    accentHex: '#38BDF8',
+  },
 
   // CARBOHIDRATOS (6 opciones - Energía para Jugar)
   {
     id: 'arepa',
     name: 'Arepa',
     category: 'carb',
-    targetSector: 'energy',
+    targetSector: 'cereals',
     modes: ['breakfast', 'lunch', 'free'],
     speechText: '¡Es la gasolina favorita para estudiar y jugar!',
     superpower: 'Gasolina para estudiar',
@@ -445,7 +556,7 @@ export const FOODS: FoodItem[] = [
     id: 'platano',
     name: 'Plátano Maduro',
     category: 'carb',
-    targetSector: 'energy',
+    targetSector: 'cereals',
     modes: ['breakfast', 'lunch', 'free'],
     speechText: '¡Te da energía natural y sabor delicioso!',
     superpower: 'Energía natural',
@@ -455,7 +566,7 @@ export const FOODS: FoodItem[] = [
     id: 'arroz',
     name: 'Arroz Blanco',
     category: 'carb',
-    targetSector: 'energy',
+    targetSector: 'cereals',
     modes: ['lunch', 'free'],
     speechText: '¡Te mantiene activo durante toda la tarde!',
     superpower: 'Energía toda la tarde',
@@ -465,7 +576,7 @@ export const FOODS: FoodItem[] = [
     id: 'yuca',
     name: 'Yuca Sancochada',
     category: 'carb',
-    targetSector: 'energy',
+    targetSector: 'cereals',
     modes: ['lunch', 'free'],
     speechText: '¡Energía de la tierra para moverte sin parar!',
     superpower: 'Energía de la tierra',
@@ -475,7 +586,7 @@ export const FOODS: FoodItem[] = [
     id: 'papa',
     name: 'Papa',
     category: 'carb',
-    targetSector: 'energy',
+    targetSector: 'cereals',
     modes: ['lunch', 'free'],
     speechText: '¡Te da energía constante para aprender!',
     superpower: 'Energía constante',
@@ -485,7 +596,7 @@ export const FOODS: FoodItem[] = [
     id: 'avena',
     name: 'Avena',
     category: 'carb',
-    targetSector: 'energy',
+    targetSector: 'cereals',
     modes: ['breakfast', 'free'],
     speechText: '¡Energía duradera para todo el día!',
     superpower: 'Energía duradera',
@@ -495,7 +606,7 @@ export const FOODS: FoodItem[] = [
     id: 'pan',
     name: 'Pan',
     category: 'carb',
-    targetSector: 'energy',
+    targetSector: 'cereals',
     modes: ['breakfast', 'lunch', 'free'],
     speechText: '¡Te da energía rápida para estudiar y jugar!',
     superpower: 'Energía para jugar',
@@ -505,10 +616,50 @@ export const FOODS: FoodItem[] = [
     id: 'pasta',
     name: 'Pasta',
     category: 'carb',
-    targetSector: 'energy',
+    targetSector: 'cereals',
     modes: ['lunch', 'free'],
     speechText: '¡Te da energía deliciosa y duradera para correr y aprender!',
     superpower: 'Energía para campeones',
+    accentHex: '#EAB308',
+  },
+  {
+    id: 'casabe',
+    name: 'Casabe',
+    category: 'carb',
+    targetSector: 'cereals',
+    modes: ['breakfast', 'lunch', 'free'],
+    speechText: '¡Crujiente y hecho de yuca natural, te da fibra y energía criolla!',
+    superpower: 'Energía criolla con fibra',
+    accentHex: '#B45309',
+  },
+  {
+    id: 'cotufas',
+    name: 'Cotufas',
+    category: 'carb',
+    targetSector: 'cereals',
+    modes: ['breakfast', 'lunch', 'free'],
+    speechText: '¡Hechas de maíz natural con poca sal, te dan energía y fibra para jugar!',
+    superpower: 'Maíz inflado con fibra',
+    accentHex: '#DC2626',
+  },
+  {
+    id: 'aceite',
+    name: 'Aceite',
+    category: 'fat',
+    targetSector: 'fats',
+    modes: ['lunch', 'free'],
+    speechText: '¡Un chorrito de aceite vegetal te da grasas saludables y ayuda a absorber vitaminas!',
+    superpower: 'Grasas buenas en poquita cantidad',
+    accentHex: '#D97706',
+  },
+  {
+    id: 'jojoto',
+    name: 'Jojoto',
+    category: 'carb',
+    targetSector: 'cereals',
+    modes: ['breakfast', 'lunch', 'free'],
+    speechText: '¡Maíz tierno natural lleno de fibra y energía sabrosa para estudiar y jugar!',
+    superpower: 'Energía y fibra de maíz',
     accentHex: '#EAB308',
   },
 
@@ -610,6 +761,61 @@ export const FOODS: FoodItem[] = [
       'Son pura azúcar y colorantes que dañan los dientes; mejor disfruta una fruta dulce natural.',
     superpower: 'Procesado con pura azúcar',
     accentHex: '#E11D48',
+  },
+  {
+    id: 'perro_caliente',
+    name: 'Perro Caliente',
+    category: 'distractor',
+    targetSector: null,
+    modes: ['breakfast', 'lunch', 'free'],
+    speechText:
+      'Tiene embutidos, salsas y mucha sal; déjalo solo para ocasiones muy especiales.',
+    superpower: 'Procesado con exceso de sal y grasa',
+    accentHex: '#DC2626',
+  },
+  {
+    id: 'pastelito',
+    name: 'Pastelito',
+    category: 'distractor',
+    targetSector: null,
+    modes: ['breakfast', 'lunch', 'free'],
+    speechText:
+      'Al ser frito absorbe mucha grasa y harina refinada; mejor elige una arepa asada o casabe.',
+    superpower: 'Fritura con exceso de grasa',
+    accentHex: '#D97706',
+  },
+  {
+    id: 'azucar',
+    name: 'Azúcar',
+    category: 'distractor',
+    targetSector: null,
+    modes: ['breakfast', 'lunch', 'free'],
+    speechText:
+      'El azúcar refinado no nutre y daña tus dientes; mejor disfruta el dulzor natural de las frutas.',
+    superpower: 'Azúcar refinada sin nutrientes',
+    accentHex: '#94A3B8',
+  },
+  {
+    id: 'mayonesa',
+    name: 'Mayonesa',
+    category: 'distractor',
+    targetSector: null,
+    modes: ['breakfast', 'lunch', 'free'],
+    speechText:
+      'La mayonesa comercial tiene mucha grasa y sal; mejor usa aguacate cremoso o un toque de limón.',
+    superpower: 'Salsa procesada con exceso de grasa',
+    accentHex: '#CA8A04',
+  },
+  {
+    id: 'helado',
+    name: 'Helado',
+    category: 'distractor',
+    targetSector: null,
+    modes: ['breakfast', 'lunch', 'free'],
+    speechText:
+      'Tiene mucha azúcar añadida y grasa; resérvalo para ocasiones especiales y prefiere frutas frías.',
+    superpower: 'Postre con exceso de azúcar',
+    accentHex: '#EC4899',
   },
 ];
 

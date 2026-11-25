@@ -3,8 +3,6 @@ import {
   BookOpen,
   Gamepad2,
   Home,
-  Maximize2,
-  Minimize2,
   Play,
   RotateCcw,
 } from 'lucide-react';
@@ -19,8 +17,6 @@ import { playUiClickSound } from '../utils/soundSystem';
 interface NutriPlatoModeSelectorProps {
   currentMode: NutriPlatoPlayMode;
   selectedMinutes: NutriPlatoTimedDurationMinutes;
-  isFullscreen: boolean;
-  onToggleFullscreen: () => void;
   onBackToLibrary: () => void;
   onBackToGuide?: () => void;
   onSelectEducational: () => void;
@@ -245,8 +241,6 @@ const PausedClockTimeUpIllustration: React.FC = () => (
 export const NutriPlatoModeSelector: React.FC<NutriPlatoModeSelectorProps> = ({
   currentMode,
   selectedMinutes,
-  isFullscreen,
-  onToggleFullscreen,
   onBackToLibrary,
   onBackToGuide,
   onSelectEducational,
@@ -298,30 +292,6 @@ export const NutriPlatoModeSelector: React.FC<NutriPlatoModeSelectorProps> = ({
           )}
 
           <SoundToggleButton />
-
-          <button
-            type="button"
-            data-testid="fullscreen-btn"
-            onClick={onToggleFullscreen}
-            aria-pressed={isFullscreen}
-            aria-label={
-              isFullscreen ? 'Salir de pantalla completa' : 'Pantalla completa para TV'
-            }
-            title={
-              isFullscreen ? 'Salir de pantalla completa' : 'Pantalla Completa (TV)'
-            }
-            className={`p-2.5 rounded-2xl border-2 border-[#1E1B2E] shadow-[0_4px_0_#1E1B2E] active:translate-y-[3px] cursor-pointer shrink-0 transition-[transform,background-color] duration-150 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-              isFullscreen
-                ? 'bg-[#fee330] hover:bg-[#f5d81d] text-[#1E1B2E]'
-                : 'bg-[#8137ea] hover:bg-[#7028d9] text-[#ffffff]'
-            }`}
-          >
-            {isFullscreen ? (
-              <Minimize2 className="w-5 h-5" aria-hidden="true" />
-            ) : (
-              <Maximize2 className="w-5 h-5" aria-hidden="true" />
-            )}
-          </button>
         </div>
       </header>
 

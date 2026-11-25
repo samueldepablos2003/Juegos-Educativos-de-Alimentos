@@ -1,10 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  BookOpen,
   Gamepad2,
   Home,
-  Maximize2,
-  Minimize2,
   RotateCcw,
   Timer,
 } from 'lucide-react';
@@ -22,8 +19,6 @@ import {
   createInitialVolunteerStats,
   evaluateFoodPlacement,
   filterFoods,
-  getEnergyItems,
-  getProteinItems,
   recordCompletedPlateStats,
   recordDistractorLessonStats,
   removeFoodFromPlate,
@@ -79,7 +74,6 @@ import {
   playUiClickSound,
   setBgmTheme,
 } from './utils/soundSystem';
-import { SoundToggleButton } from './components/SoundToggleButton';
 
 type ActiveApp = 'library' | 'nutriplato' | 'superpower' | 'semaforo' | 'lightning';
 type ScreenState = 'title' | 'playing' | 'paused' | 'gameover';
@@ -89,9 +83,11 @@ const STATS_STORAGE_KEY = 'nutriplato_volunteer_stats_v1';
 
 const TAB_TO_TOPIC: Record<FilterTab, GuideTopic> = {
   all: 'general',
-  shield: 'shield',
+  vegetables: 'vegetables',
+  fruits: 'fruits',
+  cereals: 'cereals',
   protein: 'protein',
-  energy: 'energy',
+  fats: 'fats',
   drinks: 'hydration',
   processed: 'processed',
 };
@@ -218,9 +214,11 @@ export default function App() {
   );
   const [plate, setPlate] = useState<PlateState>(() => createInitialPlate());
   const [placements, setPlacements] = useState<Record<PlateFoodSector, PlatedTransform[]>>({
-    shield: [],
+    vegetables: [],
+    fruits: [],
+    cereals: [],
     protein: [],
-    energy: [],
+    fats: [],
   });
   const zCounterRef = React.useRef<number>(BASE_PLATE_Z_INDEX);
   const instanceCounterRef = React.useRef<number>(0);
@@ -230,11 +228,9 @@ export default function App() {
   const [guideOpen, setGuideOpen] = useState<boolean>(false);
   const [guideFeedback, setGuideFeedback] = useState<GuideFeedback | null>(null);
   const [soundEnabled] = useState<boolean>(true);
-  const [nativeFullscreen, setNativeFullscreen] = useState<boolean>(false);
   const [tvFallbackFullscreen, setTvFallbackFullscreen] = useState<boolean>(false);
   const [fullscreenHint, setFullscreenHint] = useState<string | null>(null);
   const fullscreenHintTimerRef = React.useRef<number | null>(null);
-  const isFullscreen = nativeFullscreen || tvFallbackFullscreen;
   const [wiggleSector, setWiggleSector] = useState<SectorId | 'all' | null>(null);
   const [lastPlacedId, setLastPlacedId] = useState<string | null>(null);
   const [lastPlacedInstanceId, setLastPlacedInstanceId] = useState<string | null>(null);
@@ -329,7 +325,6 @@ export default function App() {
   useEffect(() => {
     const onFsChange = () => {
       const active = Boolean(getNativeFullscreenElement());
-      setNativeFullscreen(active);
       if (active) {
         setTvFallbackFullscreen(false);
         setFullscreenHint(null);
@@ -370,7 +365,6 @@ export default function App() {
   const toggleFullscreen = useCallback(async () => {
     if (getNativeFullscreenElement()) {
       await exitNativeFullscreen();
-      setNativeFullscreen(false);
       setTvFallbackFullscreen(false);
       setFullscreenHint(null);
       return;
@@ -385,7 +379,6 @@ export default function App() {
     // Attempt native browser Fullscreen API (documentElement first, then body)
     const enteredRoot = await requestNativeFullscreen(document.documentElement);
     if (enteredRoot) {
-      setNativeFullscreen(true);
       setTvFallbackFullscreen(false);
       setFullscreenHint(null);
       return;
@@ -395,7 +388,6 @@ export default function App() {
       ? await requestNativeFullscreen(document.body)
       : false;
     if (enteredBody) {
-      setNativeFullscreen(true);
       setTvFallbackFullscreen(false);
       setFullscreenHint(null);
       return;
@@ -405,13 +397,37 @@ export default function App() {
     // Activate clean TV mode fallback and inform the user clearly how to trigger OS fullscreen
     setTvFallbackFullscreen(true);
     showFullscreenHint(
-      'Modo TV activado · En vista previa integrada el navegador bloquea la pantalla completa; ábrela en pestaña nueva o presiona F11.'
+      'Modo TV activado · Presiona F para salir. En vista previa integrada el navegador puede bloquear pantalla completa; ábrela en pestaña nueva o presiona F11.'
     );
   }, [tvFallbackFullscreen, showFullscreenHint]);
 
+  // Global "F" key shortcut to enter/exit fullscreen across the entire application
+  useEffect(() => {
+    const handleGlobalFullscreenKey = (e: KeyboardEvent) => {
+      if (e.ctrlKey || e.metaKey || e.altKey || e.repeat) return;
+      const target = e.target as HTMLElement | null;
+      if (
+        target &&
+        (target instanceof HTMLInputElement ||
+          target instanceof HTMLTextAreaElement ||
+          target instanceof HTMLSelectElement ||
+          target.isContentEditable)
+      ) {
+        return;
+      }
+      if (e.key === 'f' || e.key === 'F') {
+        e.preventDefault();
+        void toggleFullscreen();
+      }
+    };
+
+    window.addEventListener('keydown', handleGlobalFullscreenKey);
+    return () => window.removeEventListener('keydown', handleGlobalFullscreenKey);
+  }, [toggleFullscreen]);
+
   const resetNutriPlatoBoard = useCallback(() => {
     setPlate(createInitialPlate());
-    setPlacements({ shield: [], protein: [], energy: [] });
+    setPlacements({ vegetables: [], fruits: [], cereals: [], protein: [], fats: [] });
     zCounterRef.current = BASE_PLATE_Z_INDEX;
     setSelectedFood(null);
     setActiveTab('all');
@@ -501,7 +517,7 @@ export default function App() {
   const resetCurrentPlate = useCallback(() => {
     playUiClickSound();
     setPlate(createInitialPlate());
-    setPlacements({ shield: [], protein: [], energy: [] });
+    setPlacements({ vegetables: [], fruits: [], cereals: [], protein: [], fats: [] });
     zCounterRef.current = BASE_PLATE_Z_INDEX;
     setSelectedFood(null);
     setLastPlacedId(null);
@@ -891,9 +907,11 @@ export default function App() {
 
   const placedIds = useMemo(() => {
     const ids = new Set<string>();
-    plate.shield.forEach((f) => ids.add(f.id));
-    getProteinItems(plate).forEach((f) => ids.add(f.id));
-    getEnergyItems(plate).forEach((f) => ids.add(f.id));
+    plate.vegetables.forEach((f) => ids.add(f.id));
+    plate.fruits.forEach((f) => ids.add(f.id));
+    plate.cereals.forEach((f) => ids.add(f.id));
+    plate.protein.forEach((f) => ids.add(f.id));
+    plate.fats.forEach((f) => ids.add(f.id));
     if (plate.hydration) ids.add(plate.hydration.id);
     return ids;
   }, [plate]);
@@ -930,12 +948,10 @@ export default function App() {
     return (
       <>
         <TitleScreen
-          isFullscreen={isFullscreen}
           onStartGame={startGame}
           onStartSuperpower={openSuperpowerGame}
           onStartSemaforo={openSemaforoGame}
           onStartLightning={openLightningGame}
-          onToggleFullscreen={toggleFullscreen}
           onOpenVolunteer={() => setVolunteerOpen(true)}
         />
         {volunteerOpen && (
@@ -953,11 +969,7 @@ export default function App() {
   if (activeApp === 'superpower') {
     return (
       <>
-        <SuperpowerCardsGame
-          isFullscreen={isFullscreen}
-          onToggleFullscreen={toggleFullscreen}
-          onBackToLibrary={goToTitle}
-        />
+        <SuperpowerCardsGame onBackToLibrary={goToTitle} />
         {fullscreenNotice}
       </>
     );
@@ -966,11 +978,7 @@ export default function App() {
   if (activeApp === 'semaforo') {
     return (
       <>
-        <SemaforoGame
-          isFullscreen={isFullscreen}
-          onToggleFullscreen={toggleFullscreen}
-          onBackToLibrary={goToTitle}
-        />
+        <SemaforoGame onBackToLibrary={goToTitle} />
         {fullscreenNotice}
       </>
     );
@@ -979,11 +987,7 @@ export default function App() {
   if (activeApp === 'lightning') {
     return (
       <>
-        <LightningQuizGame
-          isFullscreen={isFullscreen}
-          onToggleFullscreen={toggleFullscreen}
-          onBackToLibrary={goToTitle}
-        />
+        <LightningQuizGame onBackToLibrary={goToTitle} />
         {fullscreenNotice}
       </>
     );
@@ -995,8 +999,6 @@ export default function App() {
         <MinigameTutorialScreen
           gameTitle="NutriPlato"
           slides={NUTRIPLATO_TUTORIAL_SLIDES}
-          isFullscreen={isFullscreen}
-          onToggleFullscreen={toggleFullscreen}
           onBackToLibrary={goToTitle}
           onOpenModeSelector={openNutriPlatoModeSelector}
           ctaLabel={
@@ -1018,8 +1020,6 @@ export default function App() {
         <NutriPlatoModeSelector
           currentMode={nutriPlatoMode}
           selectedMinutes={nutriPlatoMinutes}
-          isFullscreen={isFullscreen}
-          onToggleFullscreen={toggleFullscreen}
           onBackToLibrary={goToTitle}
           onBackToGuide={() => openNutriPlatoGuide('mode_select')}
           onSelectEducational={() => launchNutriPlatoSession('educational')}
@@ -1037,9 +1037,9 @@ export default function App() {
   return (
     <div className="w-screen h-screen overflow-hidden bg-[#8bfffe] grid grid-cols-1 lg:grid-cols-[1fr_330px] xl:grid-cols-[1fr_365px]">
       {/* LEFT / CENTER PLAYFIELD: Solid #8bfffe Canvas + Clean Header + Centered Expanded Plate + Bottom-Right Lightbulb */}
-      <div className="relative h-full bg-[#8bfffe] flex flex-col justify-between p-3 sm:p-4 xl:p-5 overflow-hidden min-w-0">
+      <div className="relative h-full bg-[#8bfffe] flex flex-col justify-between px-3 pt-2.5 pb-1 sm:px-4 sm:pt-3 sm:pb-1.5 xl:px-5 xl:pt-3.5 xl:pb-2 overflow-hidden min-w-0">
         {/* Clean Top Utility Header */}
-        <header className="flex flex-wrap xl:flex-nowrap items-center justify-between gap-2.5 shrink-0">
+        <header className="relative z-30 flex flex-wrap xl:flex-nowrap items-center justify-between gap-2.5 shrink-0">
           <div className="flex items-center gap-2.5 min-w-0 ml-[4px]">
             <button
               type="button"
@@ -1088,20 +1088,8 @@ export default function App() {
             </div>
           )}
 
-          {/* Top-Right Utility Controls: Instructivo + Modo de Juego + Reset + Fullscreen */}
+          {/* Top-Right Utility Controls: Modo de Juego + Reset */}
           <div className="flex items-center gap-2 shrink-0">
-            <button
-              type="button"
-              data-testid="nutriplato-guide-btn"
-              onClick={() => openNutriPlatoGuide('playing')}
-              aria-label="Ver instructivo"
-              title="Ver Instructivo"
-              className="font-display px-3 py-2 rounded-2xl bg-[#ffffff] hover:bg-[#FFFDF7] text-[#1E1B2E] text-sm sm:text-base font-bold border-2 border-[#1E1B2E] shadow-[0_4px_0_#1E1B2E] active:translate-y-[3px] flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 transition-[transform,background-color] duration-150 ease-[cubic-bezier(0.22,1,0.36,1)] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#8137ea]"
-            >
-              <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-[#8137ea] shrink-0" aria-hidden="true" />
-              <span className="hidden xl:inline">Instructivo</span>
-            </button>
-
             <button
               type="button"
               data-testid="nutriplato-mode-btn"
@@ -1122,40 +1110,11 @@ export default function App() {
             >
               <RotateCcw className="w-5 h-5 pointer-events-none" aria-hidden="true" />
             </button>
-
-            <SoundToggleButton />
-
-            <button
-              type="button"
-              onClick={toggleFullscreen}
-              aria-pressed={isFullscreen}
-              aria-label={
-                isFullscreen
-                  ? 'Salir de pantalla completa'
-                  : 'Pantalla completa para TV'
-              }
-              title={
-                isFullscreen
-                  ? 'Salir de pantalla completa'
-                  : 'Pantalla completa (TV)'
-              }
-              className={`p-2.5 rounded-2xl border-2 border-[#1E1B2E] shadow-[0_4px_0_#1E1B2E] active:translate-y-[3px] cursor-pointer hidden sm:flex transition-[transform,background-color] duration-150 ease-[cubic-bezier(0.22,1,0.36,1)] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#8137ea] ${
-                isFullscreen
-                  ? 'bg-[#fee330] hover:bg-[#f5d81d] text-[#1E1B2E]'
-                  : 'bg-[#8137ea] hover:bg-[#7028d9] text-[#ffffff]'
-              }`}
-            >
-              {isFullscreen ? (
-                <Minimize2 className="w-5 h-5 pointer-events-none" aria-hidden="true" />
-              ) : (
-                <Maximize2 className="w-5 h-5 pointer-events-none" aria-hidden="true" />
-              )}
-            </button>
           </div>
         </header>
 
         {/* CENTER STAGE: Spacious Centered Plate (no vertical bar in Educational or Contrarreloj) */}
-        <main className="relative flex-1 flex items-center justify-center gap-2 sm:gap-4 min-h-0 py-1">
+        <main className="relative flex-1 flex items-stretch justify-center min-h-0">
           <HealthyPlate
             plate={plate}
             placements={placements}
@@ -1220,7 +1179,7 @@ export default function App() {
             ) : (
               <p className="text-base font-bold text-[#1E1B2E]">
                 Modo Educativo · Llevas{' '}
-                <span className="tabular-nums">{filledCount}</span> de 5 grupos en tu plato.
+                <span className="tabular-nums">{filledCount}</span> de 6 grupos en tu plato.
               </p>
             )}
             <div className="flex flex-col gap-2.5 pt-2">

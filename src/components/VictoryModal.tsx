@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { RotateCcw, Home, BarChart3, Gamepad2, Timer } from 'lucide-react';
 import { FAMILY_TIPS, GameMode, PlateState } from '../data/foods';
-import { getEnergyItems, getProteinItems, isRainbowPlate } from '../game/rules';
+import { isRainbowPlate } from '../game/rules';
 import { formatNutriPlatoTime } from '../game/nutriplatoModes';
 import { FoodIllustration } from './FoodIllustration';
 
@@ -42,13 +42,15 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({
   onGoTitle,
   onOpenVolunteer,
 }) => {
-  const rainbow = isRainbowPlate(plate.shield);
+  const rainbow = isRainbowPlate([...plate.vegetables, ...plate.fruits]);
   const chosenFoods = Array.from(
     new Map(
       [
-        ...plate.shield,
-        ...getProteinItems(plate),
-        ...getEnergyItems(plate),
+        ...plate.vegetables,
+        ...plate.fruits,
+        ...plate.cereals,
+        ...plate.protein,
+        ...plate.fats,
         ...(plate.hydration ? [plate.hydration] : []),
       ].map((f) => [f.id, f])
     ).values()

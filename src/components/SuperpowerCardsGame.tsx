@@ -3,8 +3,6 @@ import {
   ArrowLeft,
   BookOpen,
   Home,
-  Maximize2,
-  Minimize2,
   RotateCcw,
   Sparkles,
 } from 'lucide-react';
@@ -22,8 +20,6 @@ import { MinigameTutorialScreen } from './MinigameTutorialScreen';
 import { SoundToggleButton } from './SoundToggleButton';
 
 interface SuperpowerCardsGameProps {
-  isFullscreen: boolean;
-  onToggleFullscreen: () => void;
   onBackToLibrary: () => void;
 }
 
@@ -279,8 +275,6 @@ const InteractiveFood3DShowcase: React.FC<InteractiveFood3DShowcaseProps> = Reac
 });
 
 export const SuperpowerCardsGame: React.FC<SuperpowerCardsGameProps> = ({
-  isFullscreen,
-  onToggleFullscreen,
   onBackToLibrary,
 }) => {
   const [showTutorial, setShowTutorial] = useState<boolean>(true);
@@ -441,8 +435,6 @@ export const SuperpowerCardsGame: React.FC<SuperpowerCardsGameProps> = ({
       <MinigameTutorialScreen
         gameTitle="Cartas del Superpoder"
         slides={SUPERPOWER_TUTORIAL_SLIDES}
-        isFullscreen={isFullscreen}
-        onToggleFullscreen={onToggleFullscreen}
         onBackToLibrary={onBackToLibrary}
         ctaLabel={hasStartedOnce ? 'Volver a las Cartas' : '¡Entendido, a Jugar!'}
         onFinishTutorial={() => {
@@ -522,25 +514,6 @@ export const SuperpowerCardsGame: React.FC<SuperpowerCardsGameProps> = ({
               </button>
 
               <SoundToggleButton />
-
-              <button
-                type="button"
-                data-testid="fullscreen-btn"
-                onClick={onToggleFullscreen}
-                aria-label={
-                  isFullscreen
-                    ? 'Salir de pantalla completa'
-                    : 'Pantalla completa para TV'
-                }
-                title="Pantalla Completa (TV)"
-                className="p-2.5 rounded-2xl bg-[#8137ea] hover:bg-[#7028d9] border-2 border-[#1E1B2E] shadow-[0_4px_0_#1E1B2E] active:translate-y-[3px] text-[#ffffff] cursor-pointer shrink-0 transition-[transform,background-color] duration-150 ease-[cubic-bezier(0.22,1,0.36,1)]"
-              >
-                {isFullscreen ? (
-                  <Minimize2 className="w-5 h-5" aria-hidden="true" />
-                ) : (
-                  <Maximize2 className="w-5 h-5" aria-hidden="true" />
-                )}
-              </button>
             </div>
 
             {/* Right Cluster: 10-Round Segmented Progress Bar + Quick Quiz Trigger */}
@@ -602,34 +575,6 @@ export const SuperpowerCardsGame: React.FC<SuperpowerCardsGameProps> = ({
 
             <div className="flex items-center gap-2 shrink-0">
               <SoundToggleButton />
-
-              <button
-                type="button"
-                data-testid="fullscreen-btn"
-                onClick={onToggleFullscreen}
-                aria-pressed={isFullscreen}
-                aria-label={
-                  isFullscreen
-                    ? 'Salir de pantalla completa'
-                    : 'Pantalla completa para TV'
-                }
-                title={
-                  isFullscreen
-                    ? 'Salir de pantalla completa'
-                    : 'Pantalla Completa (TV)'
-                }
-                className={`p-2.5 rounded-2xl border-2 border-[#1E1B2E] shadow-[0_4px_0_#1E1B2E] active:translate-y-[3px] cursor-pointer shrink-0 transition-[transform,background-color] duration-150 ease-[cubic-bezier(0.22,1,0.36,1)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#8137ea] ${
-                  isFullscreen
-                    ? 'bg-[#fee330] hover:bg-[#f5d81d] text-[#1E1B2E]'
-                    : 'bg-[#8137ea] hover:bg-[#7028d9] text-[#ffffff]'
-                }`}
-              >
-                {isFullscreen ? (
-                  <Minimize2 className="w-5 h-5" aria-hidden="true" />
-                ) : (
-                  <Maximize2 className="w-5 h-5" aria-hidden="true" />
-                )}
-              </button>
             </div>
           </div>
         )}

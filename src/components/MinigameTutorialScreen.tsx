@@ -2,8 +2,6 @@ import React, { useCallback, useEffect, useState } from 'react';
 import {
   Gamepad2,
   Home,
-  Maximize2,
-  Minimize2,
   Play,
 } from 'lucide-react';
 import { TutorialSlideItem } from '../data/minigameTutorials';
@@ -14,8 +12,6 @@ import { playTutorialStepSound, playUiClickSound } from '../utils/soundSystem';
 interface MinigameTutorialScreenProps {
   gameTitle: string;
   slides: TutorialSlideItem[];
-  isFullscreen: boolean;
-  onToggleFullscreen: () => void;
   onBackToLibrary: () => void;
   onFinishTutorial: () => void;
   ctaLabel?: string;
@@ -26,8 +22,6 @@ interface MinigameTutorialScreenProps {
 export const MinigameTutorialScreen: React.FC<MinigameTutorialScreenProps> = ({
   gameTitle,
   slides,
-  isFullscreen,
-  onToggleFullscreen,
   onBackToLibrary,
   onFinishTutorial,
   ctaLabel = '¡Entendido, a Jugar!',
@@ -114,30 +108,6 @@ export const MinigameTutorialScreen: React.FC<MinigameTutorialScreenProps> = ({
           )}
 
           <SoundToggleButton />
-
-          <button
-            type="button"
-            data-testid="fullscreen-btn"
-            onClick={onToggleFullscreen}
-            aria-pressed={isFullscreen}
-            aria-label={
-              isFullscreen ? 'Salir de pantalla completa' : 'Pantalla completa para TV'
-            }
-            title={
-              isFullscreen ? 'Salir de pantalla completa' : 'Pantalla Completa (TV)'
-            }
-            className={`p-2.5 rounded-2xl border-2 border-[#1E1B2E] shadow-[0_4px_0_#1E1B2E] active:translate-y-[3px] cursor-pointer shrink-0 transition-[transform,background-color] duration-150 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-              isFullscreen
-                ? 'bg-[#fee330] hover:bg-[#f5d81d] text-[#1E1B2E]'
-                : 'bg-[#8137ea] hover:bg-[#7028d9] text-[#ffffff]'
-            }`}
-          >
-            {isFullscreen ? (
-              <Minimize2 className="w-5 h-5" aria-hidden="true" />
-            ) : (
-              <Maximize2 className="w-5 h-5" aria-hidden="true" />
-            )}
-          </button>
         </div>
       </header>
 
